@@ -1,0 +1,111 @@
+replace2(val)
+	r = match('\$[^() ]+', val, 'gi')
+	re = val
+	for v, i in r
+		k = split(v, re)
+		j = s('%s', convert(v))
+		re = join(j, k)
+	unquote(re)
+
+theme($property, $imp)
+	a = replace('(\$[^() ]+)', '$1', $imp)
+	// #ifndef APP-NVUE
+	b = replace('(\$)([^() ]+)', 'var(--$2, $1$2)', $imp)
+	// #endif
+	{$property} replace2(a)
+	// #ifndef APP-NVUE
+	{$property} replace2(b)
+	// #endif
+		
+$dialer_text_color ?= #ffb400
+$dialer_prize_font_size ?= 12px
+$dialer_prize_name_padding ?= 8px
+$dialer_prize_inner_padding ?= 8px
+$dialer_prize_image_size ?= 36px
+
+.l-dialer
+	position relative
+	&__inner
+		width 100%
+		height 100%
+		position relative
+		// color $dialer_text_color
+		theme('color', '$dialer_text_color')
+		background-repeat no-repeat
+		background-size cover
+		box-sizing border-box
+		&-border
+			position absolute
+			left 0
+			top 0
+			bottom 0
+			right 0
+		&-wrap
+			position relative
+			z-index 1
+			// flex 1
+			width 100%
+			height 100%
+			border-radius 50%
+			overflow hidden
+			box-sizing border-box
+			
+			&::after
+				position absolute
+				left 0
+				top 0
+				bottom 0
+				right 0
+				content ''
+				border-radius 50%
+				box-shadow 0 0 20rpx currentColor inset 
+		&-item
+			overflow hidden
+			position absolute
+			top -50%
+			left 50%
+			width 100%
+			height 100%
+			transform-origin 0 100%
+		&-content
+			position absolute
+			theme('padding-top', '$dialer_prize_inner_padding')
+			// padding-top $dialer_prize_inner_padding
+			box-sizing border-box
+			width 100%
+			height 100%
+			left -50%
+			bottom -50%
+			display flex
+			flex-direction column
+			align-items center
+		&-name
+			theme('padding-top', '$dialer_prize_name_padding')
+			theme('padding-bottom', '$dialer_prize_name_padding')
+			theme('font-size', '$dialer_prize_font_size')
+			theme('color', '$dialer_text_color')
+			// padding-top $dialer_prize_name_padding
+			// padding-bottom $dialer_prize_name_padding
+			// font-size $dialer_prize_font_size
+			// color $dialer_text_color
+		&-img
+			// margin-top 24rpx
+			theme('width', '$dialer_prize_image_size')
+			theme('height', '$dialer_prize_image_size')
+			// width $dialer_prize_image_size
+			// height $dialer_prize_image_size
+	&__pointer
+		position absolute
+		left 50%
+		top 50%
+		transform translate(-50%, -50%)
+		z-index 1
+.heart
+	animation heart 1s infinite
+@keyframes heart
+	0%
+		transform scale(1)
+	25%
+		transform scale(1.03)
+	to
+		transform scale(1)

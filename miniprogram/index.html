@@ -1,0 +1,30 @@
+<!--
+ * @Description: 
+ * @Author: chenyulong
+ * @Date: 2023-07-03 20:46:52
+ * @LastEditors: chenyulong
+ * @LastEditTime: 2024-12-12 15:18:59
+ * @Remark: 
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!--解决图片浏览器显示，img标签404问题，浏览器在发送请求时不会带上Referer信息，从而绕过服务器的防盗链检查‌-->
+    <meta name="referrer" content="no-referrer" />
+    <script>
+      var coverSupport = 'CSS' in window && typeof CSS.supports === 'function' && (CSS.supports('top: env(a)') ||
+        CSS.supports('top: constant(a)'))
+      document.write(
+        '<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0' +
+        (coverSupport ? ', viewport-fit=cover' : '') + '" />')
+    </script>
+    <title>%VITE_APP_TITLE%</title>
+    <!--preload-links-->
+    <!--app-context-->
+  </head>
+  <body>    
+    <div id="app"><!--app-html--></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

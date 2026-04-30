@@ -1,0 +1,617 @@
+.space-top {
+  padding-top: 20rpx;
+}
+
+.safe-space {
+  padding-bottom: 32rpx;
+}
+  .top-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-height: 80vh;
+    background: linear-gradient(#baffe1, #f5f6f8);
+    z-index: -1;
+  }
+  .top-bg2 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    background: #f5f5f5;;
+    z-index: -2;
+  }
+  .sticky-top {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    background: #c9fde7;
+    box-sizing: border-box;
+  }
+
+ .cpa-justify-center {
+    justify-content: center;
+  }
+  
+  .cpa-align-center {
+    align-items: center;
+  }
+  
+  .cpa-align-end {
+    align-items: flex-end;
+  }
+  
+  .cpa-justify-between {
+    justify-content: space-between;
+  }
+  
+  .cpa-justify-around {
+    justify-content: space-around;
+  }
+  
+  .cpa-justify-start {
+    justify-content: flex-start;
+  }
+  
+  .cpa-justify-end {
+    justify-content: flex-end;
+  }
+  
+  .cpa-flex {
+    display: flex;
+  }
+  
+  .cpa-row {
+    flex-direction: row;
+  }
+  
+  .cpa-column {
+    flex-direction: column;
+  }
+  
+  .cpa-relative {
+    position: relative;
+  }
+  
+  .cpa-overflow-hidden {
+    overflow: hidden;
+  }
+  
+  .cpa-flex-1 {
+    flex: 1;
+  }
+  
+  .cpa-w-full {
+    width: 100%;
+  }
+  
+  .cpa-h-full {
+    height: 100%;
+  }
+  
+  .cpa-fixed {
+    position: fixed !important;
+  }
+  
+  .cpa-absolute {
+    position: absolute;
+  }
+  
+  .cpa-right-0 {
+    right: 0;
+  }
+  
+  .cpa-top-0 {
+    top: 0;
+  }
+  
+  .cpa-bottom-0 {
+    bottom: 0;
+  }
+  
+  .cpa-left-0 {
+    left: 0;
+  }
+  
+  .cpa-p-10 {
+    padding: 20rpx;
+  }
+  
+  .cpa-p-20 {
+    padding: 40rpx;
+  }
+  
+  .cpa-pl-10 {
+    padding-left: 20rpx;
+  }
+  
+  .cpa-pl-20 {
+    padding-left: 40rpx;
+  }
+  
+  .cpa-pl-30 {
+    padding-left: 60rpx;
+  }
+  
+  .cpa-pr-10 {
+    padding-right: 20rpx;
+  }
+  
+  .cpa-pr-20 {
+    padding-right: 40rpx;
+  }
+  
+  .cpa-pr-30 {
+    padding-right: 60rpx;
+  }
+  
+  .cpa-pr-40 {
+    padding-right: 80rpx;
+  }
+  
+  .cpa-pt-10 {
+    padding-top: 20rpx;
+    padding-bottom: 20rpx;
+  }
+  
+  .cpa-pt-20 {
+    padding-top: 40rpx;
+    padding-bottom: 40rpx;
+  }
+  
+  .cpa-py-10 {
+    padding-top: 20rpx;
+    padding-bottom: 20rpx;
+  }
+  
+  .cpa-py-20 {
+    padding-top: 40rpx;
+    padding-bottom: 40rpx;
+  }
+  
+  .cpa-px-10 {
+    padding-left: 20rpx;
+    padding-right: 20rpx;
+  }
+  
+  .cpa-px-12-5 {
+    padding-left: 25rpx;
+    padding-right: 25rpx;
+  }
+  
+  .cpa-px-20 {
+    padding-left: 40rpx;
+    padding-right: 40rpx;
+  }
+  
+  .cpa-px-30 {
+    padding-left: 60rpx;
+    padding-right: 60rpx;
+  }
+  
+  .cpa-px-40 {
+    padding-left: 80rpx;
+    padding-right: 80rpx;
+  }
+  
+  .cpa-pb-10 {
+    padding-bottom: 20rpx;
+  }
+  
+  .cpa-pb-20 {
+    padding-bottom: 40rpx;
+  }
+  
+  .cpa-pb-30 {
+    padding-bottom: 60rpx;
+  }
+  
+  .cpa-pb-40 {
+    padding-bottom: 80rpx;
+  }
+  
+  .cpa-my-10 {
+    margin-top: 20rpx;
+    margin-bottom: 20rpx;
+  }
+  
+  .cpa-my-20 {
+    margin-top: 40rpx;
+    margin-bottom: 40rpx;
+  }
+  
+  .cpa-my-30 {
+    margin-top: 60rpx;
+    margin-bottom: 60rpx;
+  }
+  
+  .cpa-mt-10 {
+    margin-top: 20rpx;
+  }
+  
+  .cpa-mt-20 {
+    margin-top: 40rpx;
+  }
+  
+  .cpa-mt-30 {
+    margin-top: 60rpx;
+  }
+  
+  .cpa-mt-40 {
+    margin-top: 80rpx;
+  }
+  
+  .cpa-mt-50 {
+    margin-top: 100rpx;
+  }
+  
+  .cpa-mt-60 {
+    margin-top: 60px;
+  }
+  
+  .cpa-mt-70 {
+    margin-top: 70px;
+  }
+  
+  .cpa-mt-80 {
+    margin-top: 80px;
+  }
+  
+  .cpa-ml-5 {
+    margin-left: 10rpx;
+  }
+
+  .cpa-ml-10 {
+    margin-left: 20rpx;
+  }
+  
+  .cpa-ml-20 {
+    margin-left: 40rpx;
+  }
+  
+  .cpa-ml-30 {
+    margin-left: 60rpx;
+  }
+  
+  .cpa-ml-40 {
+    margin-left: 80rpx;
+  }
+  
+  .cpa-mr-10 {
+    margin-right: 20rpx;
+  }
+  
+  .cpa-mr-20 {
+    margin-right: 40rpx;
+  }
+  
+  .cpa-mr-30 {
+    margin-right: 60rpx;
+  }
+  
+  .cpa-mr-40 {
+    margin-right: 80rpx;
+  }
+  
+  .cpa-mr-50 {
+    margin-right: 100rpx;
+  }
+  
+  .cpa-mr-60 {
+    margin-right: 60px;
+  }
+  
+  .cpa-mr-70 {
+    margin-right: 70px;
+  }
+  
+  .cpa-mr-100 {
+    margin-right: 100px;
+  }
+  
+  .cpa-mr-160 {
+    margin-right: 160px;
+  }
+  
+  .cpa-mb-10 {
+    margin-bottom: 20rpx;
+  }
+  
+  .cpa-mb-20 {
+    margin-bottom: 40rpx;
+  }
+  
+  .cpa-mb-30 {
+    margin-bottom: 60rpx;
+  }
+  
+  .cpa-mb-40 {
+    margin-bottom: 80rpx;
+  }
+  
+  .cpa-mx-10 {
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+  }
+  
+  .cpa-mx-20 {
+    margin-left: 40rpx;
+    margin-right: 40rpx;
+  }
+  
+  .cpa-mx-25 {
+    margin-left: 50rpx;
+    margin-right: 50rpx;
+  }
+  
+  .cpa-mx-30 {
+    margin-left: 60rpx;
+    margin-right: 60rpx;
+  }
+  
+  .cpa-mx-40 {
+    margin-left: 80rpx;
+    margin-right: 80rpx;
+  }
+  
+  .cpa-radius-20 {
+    border-radius: 40rpx;
+  }
+  
+  .cpa-radius-40 {
+    border-radius: 80rpx;
+  }
+  
+  .cpa-radius-50 {
+    border-radius: 50%;
+  }
+  
+  .cpa-font-12 {
+    font-size: 24rpx;
+  }
+  
+  .cpa-font-14 {
+    font-size: 28rpx;
+  }
+  
+  .cpa-font-16 {
+    font-size: 32rpx;
+  }
+  
+  .cpa-font-18 {
+    font-size: 36rpx;
+  }
+  
+  .cpa-font-20 {
+    font-size: 40rpx;
+  }
+  
+  .cpa-font-22 {
+    font-size: 44rpx;
+  }
+  
+  .cpa-font-24 {
+    font-size: 48rpx;
+  }
+  
+  .cpa-font-26 {
+    font-size: 52rpx;
+  }
+  
+  .cpa-font-28 {
+    font-size: 56rpx;
+  }
+  
+  .cpa-font-30 {
+    font-size: 60rpx;
+  }
+  
+  .cpa-font-32 {
+    font-size: 64rpx;
+  }
+  
+  .cpa-font-34 {
+    font-size: 68rpx;
+  }
+  
+  .cpa-font-36 {
+    font-size: 72rpx;
+  }
+  
+  .cpa-font-38 {
+    font-size: 76rpx;
+  }
+  
+  .cpa-font-40 {
+    font-size: 80rpx;
+  }
+  
+  .cpa-font-42 {
+    font-size: 84rpx;
+  }
+  
+  
+  .cpa-font-46 {
+    font-size: 92rpx;
+  }
+  
+  
+  .cpa-font-52 {
+    font-size: 104rpx;
+  }
+  
+  .cpa-font-62 {
+    font-size: 124rpx;
+  }
+  
+  .cpa-line-height-50 {
+    line-height: 100rpx;
+  }
+  
+  .cpa-weight-blod {
+    font-weight: bold;
+  }
+  
+  .cpa-color-white {
+    color: #ffffff !important;
+  }
+  
+  .cpa-color-info {
+    color: #b5b5b6;
+  }
+  
+  .cpa-color-link {
+    color: #3c9cff;
+  }
+  
+  .cpa-color-primary {
+    color: #3c9cff;
+  }
+  
+  .cpa-color-success {
+    color: #53c21d;
+  }
+  
+  .cpa-color-error {
+    color: #f56c6c
+  }
+  
+  .cpa-bg-success {
+    background-color: #53c21d !important;
+  }
+  
+  .cpa-bg-error {
+    background-color: #f56c6c !important;
+  }
+  
+  .cpa-bg-warning {
+    background-color: #f9ae3d !important;
+  }
+  
+  .cpa-bg-info {
+    background-color: #909399 !important;
+  }
+  
+  .cpa-bg-blue {
+    background: linear-gradient(315deg, rgb(73, 143, 242) 0%, rgb(73, 101, 242) 100%);
+  }
+  
+  .cpa-bg-white {
+    background-color: #ffffff !important;
+  }
+  
+  .cpa-wrap {
+    flex-wrap: wrap;
+  }
+  
+  .cpa-no-wrap {
+    flex-wrap: nowrap;
+  }
+  
+  .cpa-text-center {
+    text-align: center;
+  }
+  
+  .cpa-border-box {
+    box-sizing: border-box;
+  }
+  
+  .cpa-word-break-all {
+    word-break: break-all;
+  }
+  
+  .cpa-omit-line-1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+  
+  .cpa-omit-line-2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  
+  .text-line-through {
+    text-decoration: line-through
+  }
+  
+/* flex布局 */
+.flex {
+  display: flex;
+}
+.flex_ac {
+  align-items: center;
+}
+.flex_sa {
+  justify-content: space-around;
+}
+.flex_sb {
+  justify-content: space-between;
+}
+.flex_ct {
+  justify-content: center;
+}
+.flex_col {
+  flex-direction: column;
+}
+.flex_wrap {
+  flex-wrap: wrap;
+}
+.flex_row {
+  flex-direction: row !important;
+}
+.flex1{
+  flex:1
+}
+/* 文本溢出省略号 */
+.ellipsis {
+  white-space: nowrap; /* 强制文本在一行内显示 */
+  overflow: hidden; /* 隐藏超出容器的部分 */
+  text-overflow: ellipsis; /* 用省略号表示被截断的部分 */
+}
+/* 文字颜色 */
+.c3 {
+  color: #333;
+}
+.c6 {
+  color: #666;
+}
+.c6 {
+  color: #999;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.ellipsis-line2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fs26 {
+  font-size: 26rpx !important;
+}
+.fs28 {
+  font-size: 28rpx !important;
+}
+.fs30{
+  font-size: 30rpx !important;
+}
+.fs32 {
+  font-size: 32rpx !important;
+}
