@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>aiRecycle App Icon</title>
+<rect x="0" y="0" width="512" height="512" rx="100" ry="100" fill="#ffffff"/>
+<g transform="translate(256,256)">
+<path d="M-190,-25 A225,225 0 1,1 190,-25" fill="none" stroke="#2ECC71" stroke-width="24" stroke-linecap="round"/>
+<polyline points="165,-55 220,-15 180,30" fill="#2ECC71"/>
+<path d="M190,25 A225,225 0 1,1 -190,25" fill="none" stroke="#3498DB" stroke-width="24" stroke-linecap="round"/>
+<polyline points="-180,-5 -230,-30 -185,60" fill="#3498DB"/>
+</g>
+<g transform="translate(188,168)">
+<rect x="-70" y="-42" width="140" height="84" rx="12" fill="#EAF3DE" stroke="#2ECC71" stroke-width="7"/>
+<line x1="-58" y1="-14" x2="58" y2="-14" stroke="#2ECC71" stroke-width="4.5" opacity="0.45"/>
+<line x1="-58" y1="6" x2="58" y2="6" stroke="#2ECC71" stroke-width="4.5" opacity="0.45"/>
+<line x1="-58" y1="26" x2="58" y2="26" stroke="#2ECC71" stroke-width="4.5" opacity="0.45"/>
+<rect x="-48" y="36" width="96" height="10" rx="4" fill="#2ECC71"/>
+</g>
+<g transform="translate(158,380)">
+<rect x="-46" y="-78" width="92" height="156" rx="10" fill="#E6F1FB" stroke="#3498DB" stroke-width="7"/>
+<line x1="-44" y1="-12" x2="44" y2="-12" stroke="#3498DB" stroke-width="4.5"/>
+<rect x="28" y="-62" width="8" height="20" rx="3" fill="#3498DB"/>
+<rect x="28" y="18" width="8" height="35" rx="3" fill="#3498DB"/>
+</g>
+<g transform="translate(362,380)">
+<rect x="-50" y="-74" width="100" height="148" rx="12" fill="#FAEEDA" stroke="#BA7517" stroke-width="7"/>
+<rect x="-40" y="-64" width="80" height="32" rx="6" fill="#FEF9E7" stroke="#BA7517" stroke-width="3.5"/>
+<circle cx="18" cy="-48" r="9" fill="none" stroke="#BA7517" stroke-width="3.5"/>
+<circle cx="-10" cy="-48" r="5" fill="#BA7517"/>
+<circle cx="0" cy="26" r="40" fill="none" stroke="#BA7517" stroke-width="6"/>
+<circle cx="0" cy="26" r="24" fill="#FAEEDA" stroke="#BA7517" stroke-width="3.5" opacity="0.35"/>
+</g>
+</svg>
