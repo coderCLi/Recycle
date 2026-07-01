@@ -1,0 +1,47 @@
+{
+  "miniprogramRoot": "dist/dev/mp-weixin/",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "projectname": "富区旧家电回收",
+  "description": "富拉尔基拍照估价+上门回收小程序",
+  "appid": "wx3d3c2d5d5ac27f26",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "preloadBackgroundData": false,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": true,
+    "autoAudits": false,
+    "showShadowRootInWxmlPanel": true,
+    "scopeDataCheck": false,
+    "uglifyFileName": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "compileHotReLoad": false,
+    "lazyloadPlaceholderEnable": false,
+    "useMultiFrameRuntime": true,
+    "useApiHook": true,
+    "useApiHostProcess": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "condition": false
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.7.0",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
+  },
+  "condition": {}
+}

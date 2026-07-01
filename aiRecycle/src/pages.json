@@ -1,0 +1,81 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "估价",
+        "navigationBarBackgroundColor": "#FFFFFF"
+      }
+    },
+    {
+      "path": "pages/estimate/estimate",
+      "style": {
+        "navigationBarTitleText": "估价结果",
+        "navigationBarBackgroundColor": "#FFFFFF"
+      }
+    },
+    {
+      "path": "pages/booking/booking",
+      "style": {
+        "navigationBarTitleText": "预约上门"
+      }
+    },
+    {
+      "path": "pages/orders/orders",
+      "style": {
+        "navigationBarTitleText": "我的订单"
+      }
+    },
+    {
+      "path": "pages/order-detail/order-detail",
+      "style": {
+        "navigationBarTitleText": "订单详情"
+      }
+    },
+    {
+      "path": "pages/recycler/orders",
+      "style": {
+        "navigationBarTitleText": "今日订单"
+      }
+    },
+    {
+      "path": "pages/recycler/signoff",
+      "style": {
+        "navigationBarTitleText": "签收确认"
+      }
+    }
+  ],
+  "subPackages": [],
+  "tabBar": {
+    "color": "#8C8C8C",
+    "selectedColor": "#07C160",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "估价",
+        "iconPath": "static/tab-camera.png",
+        "selectedIconPath": "static/tab-camera-active.png"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "订单",
+        "iconPath": "static/tab-orders.png",
+        "selectedIconPath": "static/tab-orders-active.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "富区旧家电回收",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F5F5"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "需要获取您的位置以便回收员上门"
+    }
+  },
+  "requiredPrivateInfos": ["getLocation", "chooseAddress", "chooseLocation"]
+}

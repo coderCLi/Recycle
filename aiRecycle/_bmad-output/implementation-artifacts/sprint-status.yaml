@@ -1,0 +1,58 @@
+# generated: 2026-07-01
+# last_updated: 2026-07-01
+# project: aiRecycle
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: "{implementation_artifacts}"
+
+generated: 2026-07-01
+last_updated: 2026-07-01
+project: aiRecycle
+project_key: NOKEY
+tracking_system: file-system
+story_location: "{implementation_artifacts}"
+
+development_status:
+  epic-1: done
+  1-1-project-scaffold: done
+  1-2-photo-recognition: done
+  1-3-price-estimation: done
+  1-4-price-config-import: done
+  1-5-wechat-payment: done
+  1-6-miniprogram-review-config: done
+  epic-1-retrospective: optional
+
+  epic-2: done
+  2-1-timeslot-booking: done
+  2-2-no-registration-order: done
+  2-3-order-tracking: done
+  2-4-recycler-assignment: done
+  2-5-search-optimization: done
+  epic-2-retrospective: optional
+
+  epic-3: done
+  3-1-admin-scaffold-auth: done
+  3-2-order-management: done
+  3-3-offline-data-entry: done
+  3-4-recycler-management: done
+  3-4a-settlement-management: done
+  3-5-pricing-config-deviation: done
+  3-6-multi-channel-comparison: done
+  3-7-user-management: done
+  3-8-data-export-competitor: done
+  3-9-one-click-publish: done
+  epic-3-retrospective: optional
+
+  epic-4: done
+  4-1-recycler-order-list: done
+  4-2-navigate-to-address: done
+  4-3-on-site-signoff: done
+  4-4-admin-push-notification: done
+  epic-4-retrospective: optional
+
+  epic-5: done
+  5-1-subscription-messages: done
+  5-2-carbon-share-poster: done
+  5-3-recycler-points-ranking: done
+  5-4-dormant-user-wakeup: done
+  epic-5-retrospective: optional
