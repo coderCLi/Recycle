@@ -8,9 +8,11 @@
 
 
 // #ifdef MP_WEIXIN
-// 百度移动统计用户手册  https://mtj.baidu.com/static/userguide/book/
-import './utils/mtj-wx-sdk.config'
-import './utils/mtj-wx-sdk';
+// 百度移动统计已停用：它会请求 hmma.baidu.com，真机域名校验会失败报错，且本项目已不需要它
+// import './utils/mtj-wx-sdk.config'
+// import './utils/mtj-wx-sdk';
+import { initCloud } from '@/utils/cloud'
+initCloud()
 // #endif
 
 
@@ -160,7 +162,9 @@ function createApp() {
   app.config.globalProperties.businessTool = business;
 
   // 项目访问基础地址，https://xxx.xxx.xxx.xxx/h5/
-  app.config.globalProperties.baseUrl = location ? location.origin + location.pathname : "";
+  // 注意：微信小程序真机没有 location 全局变量，必须用 typeof 判断，否则会抛 ReferenceError 导致白屏
+  app.config.globalProperties.baseUrl =
+    typeof location !== "undefined" && location ? location.origin + location.pathname : "";
 
   // 项目静态资源地址，用于存放项目中用到的图片一类的资源，可通过web管理端或ftp上传至静态资源服务器指定目录下，一般是hbd
   // app.config.globalProperties.staticBaseUrl = __VITE_SERVER_BASEURL__;

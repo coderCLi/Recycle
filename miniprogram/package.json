@@ -58,8 +58,8 @@
         "title": "mp-weixin dev环境 http://128.128.2.65:29210",
         "env": {
           "UNI_PLATFORM": "mp-weixin",
-          "VITE_SERVER_BASEURL": "http://128.128.2.65:29210",
-          "VITE_SERVER_OTHERURL": "https://test.hihihi.com.cn",
+          "VITE_SERVER_BASEURL": "",
+          "VITE_SERVER_OTHERURL": "",
           "VITE_ENV_VERSION": "1",
           "DEPLOY_ENV": "dev"
         }
@@ -68,8 +68,8 @@
         "title": "mp-weixin test环境 https://test.hihihi.com.cn",
         "env": {
           "UNI_PLATFORM": "mp-weixin",
-          "VITE_SERVER_BASEURL": "https://test.hihihi.com.cn",
-          "VITE_SERVER_OTHERURL": "https://test.hihihi.com.cn",
+          "VITE_SERVER_BASEURL": "",
+          "VITE_SERVER_OTHERURL": "",
           "VITE_ENV_VERSION": "2",
           "DEPLOY_ENV": "test"
         }
@@ -78,8 +78,8 @@
         "title": "mp-weixin pro环境 https://life.hihihi.com.cn",
         "env": {
           "UNI_PLATFORM": "mp-weixin",
-          "VITE_SERVER_BASEURL": "https://life.hihihi.com.cn",
-          "VITE_SERVER_OTHERURL": "https://life.hihihi.com.cn",
+          "VITE_SERVER_BASEURL": "",
+          "VITE_SERVER_OTHERURL": "",
           "VITE_ENV_VERSION": "0",
           "DEPLOY_ENV": "pro"
         }
@@ -88,8 +88,8 @@
         "title": "h5 dev环境 http://128.128.2.108:29210",
         "env": {
           "UNI_PLATFORM": "h5",
-          "VITE_SERVER_BASEURL": "http://128.128.2.128:29210",
-          "VITE_SERVER_OTHERURL": "https://test.hihihi.com.cn",
+          "VITE_SERVER_BASEURL": "",
+          "VITE_SERVER_OTHERURL": "",
           "VITE_ENV_VERSION": "1",
           "DEPLOY_ENV": "dev"
         }
@@ -98,8 +98,8 @@
         "title": "h5 test环境 https://test.huibaoding.com",
         "env": {
           "UNI_PLATFORM": "h5",
-          "VITE_SERVER_BASEURL": "https://test.hihihi.com.cn",
-          "VITE_SERVER_OTHERURL": "https://test.hihihi.com.cn",
+          "VITE_SERVER_BASEURL": "",
+          "VITE_SERVER_OTHERURL": "",
           "VITE_ENV_VERSION": "2",
           "DEPLOY_ENV": "test"
         }
@@ -108,8 +108,8 @@
         "title": "h5 pro环境 https://life.hihihi.com.cn",
         "env": {
           "UNI_PLATFORM": "h5",
-          "VITE_SERVER_BASEURL": "https://life.hihihi.com.cn",
-          "VITE_SERVER_OTHERURL": "https://life.hihihi.com.cn",
+          "VITE_SERVER_BASEURL": "",
+          "VITE_SERVER_OTHERURL": "",
           "VITE_ENV_VERSION": "0",
           "DEPLOY_ENV": "pro"
         }

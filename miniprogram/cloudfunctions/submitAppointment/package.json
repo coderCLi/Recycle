@@ -1,0 +1,9 @@
+{
+  "name": "submitAppointment",
+  "version": "1.0.0",
+  "description": "提交回收预约单并通知",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

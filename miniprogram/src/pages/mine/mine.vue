@@ -1,894 +1,756 @@
 <!--
- * @Description: 我的
- * @Author: chenyulong
- * @Date: 2024-09-24 13:09:23
- * @LastEditors: chilei gchilei0815@gmail.com
- * @LastEditTime: 2026-04-30 10:55:01
- * @Remark: 
+ * @Description: 我的（回收小程序）
+ * @Author: chilei gchilei0815@gmail.com
 -->
 <template>
-  <vc-modal ref="modal"></vc-modal>
-  <view class="main">
-    <!--  背景  -->
-    <view class="top-bg"></view>
-     <!-- <image
-     class="top-bg"
-      :src="minioBaseUrl + 'common/tabbarImages/mine_bg_img.png'"
-      mode="scaleToFill"
-     /> -->
-    <vc-header-logo></vc-header-logo>
-    <!--未登录-->
-    <view class="login-box">
-      <view v-if="!isLogined" class="no-login" @click="bridgeSdk.toLogin">
-        <image class="headImg" style="width: 150rpx; height: 150rpx" :src="minioBaseUrl + noHeadPng" mode="aspectFit" />
-        <view class="login-info-box">
-          <text class="tit">未登录</text>
-          <text class="content">欢迎登录衣回收，点击登录</text>
-        </view>
-      </view>
-      <view v-else class="login-container">
-        <view class="user-icon">
-          <image class="user-icon-img" v-if="userInfo.head" :src="`${minioBaseUrl}${userInfo.head}`"></image>
-          <image class="user-icon-img" v-else :src="minioBaseUrl + '/common/tabbarImages/huiyuanma_weixintouxiang_default_img.png'"
-            mode="widthFix"></image>
-        </view>
-        <view class="login-container-info">
-          <view class="login-container-info-name" v-if="userInfo.isRealname == '1' && userInfo.desUserName">{{
-            userInfo.desUserName }}</view>
-          <view class="login-container-info-name" v-else-if="nickName">{{
-            nickName
-          }}</view>
-          <view class="login-container-info-level"  @click="checkIdentityAuth(userInfo.isRealname == '1')">
-             <image class="level-icon" :src="minioBaseUrl + memberInfo.backclothUrl" mode="scaleToFill" />
-            <!-- 实名 -->
-           <view class="real_box">
-             <image v-if="userInfo.isRealname == '1'" class="real_name_icon" :src="minioBaseUrl + 'common/tabbarImages/is_real_name.png'" mode="scaleToFill" />
-            <image v-else class="real_name_icon" :src="minioBaseUrl + 'common/tabbarImages/no_real_name.png'" mode="scaleToFill" />
-          
-            {{ userInfo.isRealname == "1" ? "已实名认证" : "未实名认证" }}
-           </view>
+  <view>
+    <vc-container :props-data="containerProps">
+      <view class="mine">
+        <scroll-view class="mine-scroll" scroll-y>
+
+        <!-- 用户区 -->
+        <view class="user-card">
+          <view class="user">
+            <!-- 点击头像：调起微信头像（使用微信头像/相册/拍照） -->
+            <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
+              <image class="avatar" :src="avatar" mode="aspectFill" @error="onAvatarError" />
+              <view class="avatar-edit">改</view>
+            </button>
+            <view class="user-info">
+              <view class="user-name-row">
+                <!-- 点击名字：弹出微信昵称，选中后自动保存 -->
+                <input
+                  v-if="nameEditing"
+                  class="user-name-input"
+                  type="nickname"
+                  v-model="nameDraft"
+                  :focus="nameEditing"
+                  :maxlength="20"
+                  placeholder="点击使用微信昵称"
+                  placeholder-style="color:#9ca3af"
+                  @blur="saveNickName"
+                  @confirm="saveNickName"
+                />
+                <template v-else>
+                  <view class="user-name" @click="startEditName">{{ nickName }}</view>
+                  <view class="user-name-edit" @click="startEditName">改</view>
+                </template>
+              </view>
+              <view class="user-sub">欢迎使用富区回收</view>
+              <view class="user-tip">点击头像或昵称，同步微信资料</view>
+            </view>
           </view>
         </view>
-      </view>
-    </view>
 
+        <!-- 我的预约 -->
+        <view class="section">
+          <view class="section-head">
+            <view class="section-title">我的预约</view>
+            <view v-if="isAdmin" class="section-more" @click="goAdmin">管理全部 ›</view>
+          </view>
+          <vc-skeleton v-if="ordersLoading && orders.length === 0" type="order" :rows="3" />
+          <view v-else-if="orders.length === 0" class="empty">
+            <view class="empty-text">暂无预约记录</view>
+            <view class="empty-btn" @click="goEstimate">去估价预约</view>
+          </view>
+          <view v-else class="order-list">
+            <view v-for="(o, i) in displayOrders" :key="i" class="order-item">
+              <view class="order-main">
+                <text class="order-name">{{ o.item ? o.item.brand + " " + o.item.model : "回收物品" }}</text>
+                <text class="order-price">¥{{ o.item ? o.item.price : 0 }}</text>
+              </view>
+              <view class="order-sub">{{ o.date }} · {{ o.time }} · {{ o.address }}</view>
+              <!-- 物品照片 -->
+              <view v-if="o.images && o.images.length" class="order-images">
+                <image
+                  v-for="(img, idx) in o.images"
+                  :key="idx"
+                  class="order-image"
+                  :src="img"
+                  mode="aspectFill"
+                  @click.stop="previewOrderImages(o.images, idx)"
+                />
+              </view>
+            </view>
+          </view>
 
-    <view class="point_card">
-      <view class="point_card_item">
-        <view class="point_card_content">
-          <text class="point_card_num">{{ fbfNumber }}</text>
-          <text class="point_card_title">会员积分</text>
+          <view v-if="hasMoreOrders" class="order-more" @click="goAdmin">
+            查看更多 ›
+          </view>
         </view>
-      </view>
-      <view class="gray_line"></view>
-      <view class="point_card_item" @click="jumpKQPage">
-        <view class="point_card_content">
-          <text class="point_card_num">{{ kqNumber }}</text>
-          <text class="point_card_title">我的卡券</text>
-        </view>
-      </view>
-      <view class="gray_line"></view>
-      <view class="point_card_item">
-        <view class="point_card_content">
-          <text class="point_card_num">{{ pointBalance }}</text>
-          <text class="point_card_title">钱包余额（元）</text>
-        </view>
-      </view>
-    </view>
 
-    <!-- 去充值 -->
-    <view class="toRechargeBox" v-if="isLogined">
-      <image class="toRechargeImg" :src="minioBaseUrl + '/common/tabbarImages/mine_title_font_img.png'" mode="heightFix" />
-      <!-- <image class="toRechargeTitleImg" :src="minioBaseUrl + '/common/tabbarImages/mine_font_dangqianyue_img.png'" mode="scaleToFill" /> -->
-      <!-- <text class="toRechargeTitle">当前余额：</text> -->
-      <!-- <text class="toRechargeText">{{ pointBalance }}元</text> -->
-      <view class="toRechargeBtn" @click="toRecharge">
-        <text class="toRechargeBtnText">去充值</text>
-        <u-icon name="arrow-right" size="24rpx" color="#fff" class="arrow-right"></u-icon>
-      </view>
-    </view>
+        <!-- 功能菜单 -->
+        <view class="section">
+          <view class="section-title">服务</view>
+          <view class="grid">
+            <view class="grid-item" @click="showContact = true">
+              <view class="grid-icon icon-contact">联</view>
+              <view class="grid-name">联系我们</view>
+            </view>
+            <view class="grid-item" @click="goAbout" @longpress="unlockAdmin">
+              <view class="grid-icon icon-about">关</view>
+              <view class="grid-name">关于我们</view>
+            </view>
+            <view class="grid-item" @click="goFeedback">
+              <view class="grid-icon icon-feedback">反</view>
+              <view class="grid-name">意见反馈</view>
+            </view>
+            <view v-if="isAdmin" class="grid-item" @click="goAdmin">
+              <view class="grid-icon icon-admin">管</view>
+              <view class="grid-name">预约管理</view>
+            </view>
+            <view v-if="isAdmin" class="grid-item" @click="goCategories">
+              <view class="grid-icon icon-category">类</view>
+              <view class="grid-name">分类管理</view>
+            </view>
+          </view>
+        </view>
 
-    <view class="member-box" v-if="isLogined" @click="jumpFBPage">
-      <view class="current-title" >当前等级</view>
-      <member-card class="member-card" :info="memberInfo"></member-card>
-    </view>
-    <view class="my-order">
-      <view class="my-order-title">
-        <image class="my-order-title-icon" :src="minioBaseUrl + '/common/tabbarImages/mine_titlefont_wodedingdan_img.png'"
-          mode="scaleToFill" />
-      </view>
-      <view class="my-order-content">
-        <view class="my-order-item" @click="jumpToMyOrder">
-          <image class="my-order-icon" :src="minioBaseUrl + '/common/tabbarImages/icon_wodedingdan_img.png'"
-            mode="scaleToFill" />
-          <view class="my-order-name">我的订单</view>
-        </view>
-        <view class="gray_line"></view>
-        <view class="my-order-item" @click="jumppointMall">
-          <image class="my-order-icon" :src="minioBaseUrl + '/common/tabbarImages/icon_jifenshangcheng_img.png'"
-            mode="scaleToFill" />
-          <view class="my-order-name">在线商城</view>
-        </view>
-      </view>
-    </view>
-
-    <view class="more-service">
-      <view class="more-service-title">
-        <image class="more-service-title-icon" :src="minioBaseUrl + '/common/tabbarImages/mine_titlefont_gengduoyingyong_img.png'"
-          mode="scaleToFill" />
-      </view>
-      <view class="more-service-content">
-        <view v-for="(item, index) in serviceList" :key="index" class="more-service-item" @click="toPage(item)">
-          <image class="more-service-icon" :src="minioBaseUrl + item.img" mode="scaleToFill"></image>
-          <text class="more-service-name">{{ item.title }}</text>
-        </view>
-      </view>
-    </view>
         <vc-safe-bottom />
+        </scroll-view>
+      </view>
+    </vc-container>
+
+    <vc-tabbar current="mine" />
+
+    <!-- 联系弹窗 -->
+    <view v-if="showContact" class="contact-mask" @click="showContact = false">
+      <view class="contact-pop" @click.stop>
+        <view class="contact-title">联系我们</view>
+        <image
+          v-if="!qrError"
+          class="contact-qr"
+          :src="qrCodeUrl"
+          mode="aspectFit"
+          :show-menu-by-longpress="true"
+          @error="qrError = true"
+          @click="previewQr"
+        />
+        <view v-else class="contact-qr-placeholder">
+          <text class="placeholder-line">请把你的微信二维码图片</text>
+          <text class="placeholder-line">命名为 weixin-qrcode.png</text>
+          <text class="placeholder-line">放到 src/static/images/ 下</text>
+        </view>
+        <view class="contact-desc">长按上方图片识别二维码，添加微信</view>
+        <view class="contact-phone" @click="call">拨打电话 {{ phone }}</view>
+        <view class="contact-footer-tip">长按二维码图片，选择「识别图中二维码」即可添加微信</view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script>
 import { mapState } from "pinia";
-import { useBaseStore, useUserStore } from "@/store/index";
-import {
-  getUserFubaoPointsAndMemberLevel,
-  getGlobalCode,
-  getCouponListSec
-} from "@/api/mine";
-import {
-  getBalanceAndScore
-} from "@/api/memberCode"
-import vcHeaderLogo from "@/components/library/base/vc-header-logo/index.vue";
-import memberCard from "@/pages/mine/memberCard.vue"
+import { useUserStore } from "@/store/index";
+import { getAppointments, callFunction, toTempFileURLs } from "@/utils/cloud";
+import vcLoading from "@/components/library/base/vc-loading/vc-loading.vue";
+import vcSkeleton from "@/components/library/base/vc-skeleton/vc-skeleton.vue";
+import vcTabbar from "@/components/library/base/vc-tabbar/vc-tabbar.vue";
+
 export default {
+  components: { vcLoading, vcSkeleton, vcTabbar },
   name: "mine",
-  components: {
-    memberCard,
-    vcHeaderLogo
-  },
   data() {
     return {
-      nickName: "",
-
-      noHeadPng: "common/tabbarImages/huiyuanma_weixintouxiang_default_img.png",
-      messageList: [
-        // #ifdef H5
-        {
-          title: "我的证照",
-          img: "/hbdimage/main/images/home/kaquan.png",
-          needLogin: true,
-          isBuilding: true,
+      containerProps: {
+        props: {
+          title: { value: "我的" },
+          isFullScreen: { value: true },
+          backgroundColor: { value: "#f5f6f8" },
         },
-        // #endif
-        {
-          title: "我的卡券",
-          url: "/package-cards-platform/card/cardList",
-          needLogin: true,
-          img: "/hbdimage/main/images/home/quanbao.png",
-        },
-        // #ifdef H5
-        {
-          title: "我的订单",
-          img: "/hbdimage/main/images/home/dingdan.png",
-          needLogin: true,
-          url: "/package-product-list/shopList/shopList?needLogin=true",
-          // isBuilding: true,
-        },
-        {
-          title: "我的收藏",
-          img: "/hbdimage/examination/shoucang.png",
-          needLogin: true,
-          url: "/package-testHelper/collect/index",
-          // isBuilding: true,
-        },
-        // #endif
-      ],
-      serviceList: [
-        // // #ifdef H5
-        // {
-        //   title: "我是商户",
-        //   img: "/hbdimage/main/images/home/我是商户.png",
-        //   url: "/package-product-list/transit/transit",
-        //   needLogin: true,
-        // },
-        // // #endif
-        // // #ifdef H5
-        // {
-        //   title: "收货地址",
-        //   img: "/hbdimage/main/images/home/收货地址.png",
-        //   url: "/package-address/pages/addressList",
-        //   needLogin: true,
-        //   // isBuilding: true,
-        // },
-        // // #endif
-        // {
-        //   title: "推荐",
-        //   img: "/hbdimage/main/images/home/推荐惠保定.png",
-        //   url: "/package-recommend-hbd/recommendHbd/recommendHbd",
-        // },
-        {
-          title: "我是商户",
-          img: "/common/tabbarImages/icon_woshishanghu_img.png",
-          url: "/package-product-list/transit/transit",
-          needLogin: true,
-        },
-        {
-          title: "收货地址",
-          img: "/common/tabbarImages/icon_shouhuodizhi_img.png",
-          url: "/package-address/pages/addressList",
-          needLogin: true,
-          // isBuilding: true,
-        },
-        {
-          title: "帮助与反馈",
-          img: "/common/tabbarImages/icon_bangzhuyufankui_img.png",
-          url: "/pages/feedback/feedback",
-          needLogin: true,
-        },
-        // #ifdef H5
-        // {
-        //   title: "智能客服",
-        //   img: "/hbdimage/main/images/home/kefu.png",
-        //   method: "toService",
-        // },
-        // #endif
-        {
-          title: "设置",
-          img: "/common/tabbarImages/setting.png",
-          // url: "/package-my-about/pages/about?channelType=mini",
-          url: "/pages/setting/setting",
-          needLogin: true,
-        },
-        {
-          title: "关于我们",
-          img: "/common/tabbarImages/icon_aboutus_img.png",
-          // url: "/package-my-about/pages/about?channelType=mini",
-          url: "/package-my-about/pages/about",
-        },
-        // {
-        //   title: "我的订阅",
-        //   img: "/hbdimage/main/images/home/dingyueguanli.png",
-        //   url: "/package-general-services/subscribe/index",
-        //   needLogin: true,
-        // },
-        // {
-        //   title: "老兵码",
-        //   img: "/hbdimage/main/images/mine/laomingma.png",
-        //   url: "/page-elderl-mode/veteran/veteran",
-        //   needLogin: true,
-        // },
-      ],
-
-      // 钱包余额
-      pointBalance: "--",
-
-      // 会员分
-      fbMemberLevel: "",
-      fbfNumber: "--", // 会员分数量
-      kqNumber: "--", // 卡券数量
-      memberInfo: {}, // 会员信息
-      mineInfoList: [
-        {
-          name: "我的证照",
-          imgUrl: "common/mineImg/wodezhengzhao.png",
-        },
-        {
-          name: "五险一金",
-          imgUrl: "common/mineImg/wuxianyijin.png",
-        },
-      ],
-      isSignIn: false,
-      pointOpenFlag: '0', // 积分会员启用状态
+      },
+      // TODO: 替换成你自己的微信号二维码图片 URL
+      phone: "13130009661",
+      defaultAvatar: "static/images/tabBar/home_tabbar_icon_mine_normal_img.png",
+      orders: [],
+      ordersLoading: false,
+      showContact: false,
+      qrError: false,
+      isAdmin: false,
+      // 当前微信用户的头像、昵称（本地持久化）
+      profileAvatar: "",
+      profileNickName: "",
+      nameEditing: false,
+      nameDraft: "",
     };
   },
   computed: {
-    ...mapState(useBaseStore, {
-      safeTopDistance: "safeTopDistance",
-      navigationBarInfo: "navigationBarInfo",
-    }),
     ...mapState(useUserStore, {
       isLogined: "isLogined",
       userInfo: "userInfo",
     }),
-  },
-  watch: {
-    isLogined(newVal) {
-      this.__loadData__();
-      console.log("userInfo", this.userInfo);
-      if (
-        newVal &&
-        (!this.userInfo.head ||
-          (this.userInfo.isRealname == "1" &&
-            (this.userInfo.desUserName || "").length == 0))
-      ) {
-        this.bridgeSdk.updateUserInfo();
+    avatar() {
+      if (this.profileAvatar) return this.profileAvatar;
+      if (this.userInfo && this.userInfo.head) {
+        return this.minioBaseUrl + this.userInfo.head;
       }
+      return this.defaultAvatar;
     },
+    nickName() {
+      if (this.profileNickName) return this.profileNickName;
+      if (this.userInfo && this.userInfo.desUserName) return this.userInfo.desUserName;
+      if (this.userInfo && this.userInfo.nickName) return this.userInfo.nickName;
+      return "回收用户";
+    },
+    /** 只展示部分预约：无图片显示 3 条，有图片显示 2 条（露出「查看更多」） */
+    displayOrders() {
+      const hasImages = this.orders.some((o) => o.images && o.images.length);
+      const limit = hasImages ? 2 : 3;
+      return this.orders.slice(0, limit);
+    },
+    hasMoreOrders() {
+      return this.orders.length > this.displayOrders.length;
+    },
+    qrCodeUrl() {
+      // 本地二维码图片：src/static/images/weixin-qrcode.png
+      return "/static/images/weixin-qrcode.png";
+    },
+  },
+  onLoad() {
+    this.loadProfile();
   },
   onShow() {
-    this.bridgeSdk.beans.setGlobalThis(this);
-    this.__loadShow__();
-  },
-  onHide() {
-    this.bridgeSdk.beans.removeGlobalThis(this);
-  },
-  async onLoad(options) {
-    // await this.firstInit();
-    this.trackReport.trackPageView("我的");
-
-    if (!this.bridgeSdk.isTokenValid()) {
-      this.bridgeSdk.beans.setTokenGetCallback(this.__loadData__);
-      return;
+    // 隐藏原生 tabBar，改用自定义底栏（中间突起「回收」按钮）
+    try {
+      uni.hideTabBar({ animation: false });
+    } catch (e) {
+      console.warn("隐藏原生 tabBar 失败", e);
     }
-    this.__loadData__();
+
+    this.loadOrders();
+    this.loadAdminStatus();
   },
   methods: {
-    __loadData__() {
-      this.selUserPoints();
-      getGlobalCode({ code: "pointsOnOff" }, { mask: false, catchError: true, encrypt: false, decrypt: false }).then(res => {
-        console.log("getGlobalCode", res)
-        this.pointOpenFlag = res.param
-      })
-    },
-    __loadShow__() {
-      if (
-        this.isLogined &&
-        (!this.userInfo.head ||
-          (this.userInfo.isRealname == "1" &&
-            (this.userInfo.desUserName || "").length == 0))
-      ) {
-        this.bridgeSdk.updateUserInfo();
-      }
-      if (this.isLogined) {
-        let userInfo = this.bridgeSdk.getUserInfo()?.userInfo
-        console.log("mine userInfo", userInfo)
-        const { nickName } = userInfo;
-        this.nickName = nickName;
-        // isCheckIns({}, { mask: false }).then((res) => {
-        //   console.log("isCheckIns", res);
-        //   this.isSignIn = res;
-        // })
-        this.getBalanceAndScore()
-        this.getCouponListSec()
-        getUserFubaoPointsAndMemberLevel({ privilegeType: "FB" }, { mask: false, catchError: true }).then(res => {
-          console.log("getUserFubaoPointsAndMemberLevel", res)
-          this.fbfNumber = res.points.totalPoints
-          this.memberInfo = res.vip
-          this.memberInfo.totalPoints = res.points.totalPoints
-          // 获取福保登记
-          // this.fbMemberLevel = res.levelName
-          // this.fbfNumber = res.points.totalPoints
-          // this.fbBenefit = []
-          // if(res.vipTipTexts&&res.vipTipTexts.length){
-          //   this.fbBenefit = res.vipTipTexts.map(item=> {
-          //     return {
-          //       name: item.hintText,
-          //       imgUrl: item.iconUrl
-          //     }
-          //   })
-          // }
-        })
+    // 读取本地保存的微信头像、昵称
+    loadProfile() {
+      const saved = this.bridgeSdk.getStorageSync("recycle_user_profile") || {};
+      this.profileAvatar = saved.avatar || "";
+      this.profileNickName = saved.nickName || "";
+      // 兼容已登录用户的微信昵称
+      if (!this.profileNickName) {
+        try {
+          const info = (this.bridgeSdk.getUserInfo() || {}).userInfo || {};
+          this.profileNickName = info.nickName || "";
+        } catch (e) {
+          console.warn("读取微信昵称失败", e);
+        }
       }
     },
-    selUserPoints(){
-      if(!this.isLogined){
-        this.pointBalance = "--"
-        this.fbfNumber = "--"
-        this.kqNumber = "--"
-      }
+    persistProfile() {
+      this.bridgeSdk.setStorageSync("recycle_user_profile", {
+        avatar: this.profileAvatar,
+        nickName: this.profileNickName,
+      });
     },
-    getCouponListSec(){
-      getCouponListSec({ 
-          getStatus: "0",
-          userId: this.userInfo.userId,
-          page: 1,
-          rows: 10
-        }).then(res => {
-          console.log("res", res);
-          this.kqNumber = res.total;
-      })
-    },
-    getBalanceAndScore() {
-       getBalanceAndScore({}).then(res => {
-          console.log("获取用户余额和积分", res);
-          this.pointBalance = res.balance;
-          this.score = res.score;
-      })
-    },
-
-    toPage(item) {
-      console.log("mine item", item);
-
-      if (this[item.method]) {
-        this[item.method]();
-        return;
-      }
-      if(item.url == '/package-product-list/transit/transit'){
-        wx.navigateToMiniProgram({
-          appId: 'wx4152021ea617a1f5',
-          path: 'pages/income/index',
-          envVersion: 'release', // release(正式版)、trial(体验版)
-          success(res) {
-            console.log('跳转成功', res);
-          },
-          fail(err) {
-            console.error('跳转失败', err);
-            wx.showToast({ title: '跳转失败', icon: 'none', duration: 2000 });
+    // 点击头像：微信头像选择回调
+    onChooseAvatar(e) {
+      const tempPath = e && e.detail && e.detail.avatarUrl;
+      if (!tempPath) return;
+      let savedPath = tempPath;
+      // 微信返回的是临时文件，转存到本地用户目录，避免重启后失效
+      // #ifdef MP-WEIXIN
+      try {
+        const fs = wx.getFileSystemManager();
+        const oldPath = this.profileAvatar;
+        const destPath = `${wx.env.USER_DATA_PATH}/recycle-avatar-${Date.now()}.png`;
+        fs.copyFileSync(tempPath, destPath);
+        savedPath = destPath;
+        if (oldPath && oldPath.indexOf(wx.env.USER_DATA_PATH) === 0) {
+          try {
+            fs.unlinkSync(oldPath);
+          } catch (err) {
+            console.warn("删除旧头像失败", err);
           }
-        })
-        return;
+        }
+      } catch (err) {
+        console.warn("保存微信头像失败，使用临时路径", err);
       }
-      this.bridgeSdk.jumpPage(item);
+      // #endif
+      this.profileAvatar = savedPath;
+      this.persistProfile();
+      this.bridgeSdk.showToast({ title: "微信头像已更新" });
     },
-    toService() {
-      this.bridgeSdk.toIntelligentService();
-    },
-    checkIdentityAuth(state) {
-      // false，未实名
-      if (!state) {
-        this.bridgeSdk.checkIdentityAuth();
-      }
-    },
-    goSignIn() {
-      // q去签到
-      if (this.isLogined) {
-        uni.navigateTo({
-          url: "/package-member-center/memberSignIn/memberSignIn"
-        })
+    onAvatarError() {
+      // 本地缓存的头像文件失效时，回退到默认头像
+      if (this.profileAvatar) {
+        this.profileAvatar = "";
+        this.persistProfile();
       }
     },
-    jumpKQPage(){
-      this.bridgeSdk.jumpPage({
-        url: "/package-cards-platform/card/cardList",
-        needLogin: true,
-        title: "我的卡券"
-      })
+    // 点击名字：切换为微信昵称输入，键盘上方会出现「使用微信昵称」
+    startEditName() {
+      this.nameDraft = "";
+      this.nameEditing = true;
     },
-
-    // 跳转福保首页
-    jumpFBPage() {
-      // if (this.pointOpenFlag == '0') return
-      this.bridgeSdk.jumpPage({
-        url: "/package-member-center/memberCenter/memberCenter",
-        needLogin: true,
-        title: "会员中心"
-      })
+    saveNickName(e) {
+      if (!this.nameEditing) return;
+      this.nameEditing = false;
+      const value = ((e && e.detail && e.detail.value) || this.nameDraft || "").trim();
+      this.nameDraft = "";
+      if (!value || value === this.nickName) return;
+      this.profileNickName = value;
+      this.persistProfile();
+      this.bridgeSdk.showToast({ title: "微信昵称已更新" });
     },
-    // 去充值
-    toRecharge() {
-      this.bridgeSdk.jumpPage({
-        url: "/package-money-transactions/recharge/index",
-        needLogin: true,
-        title: "充值"
-      })
+    async loadOrders() {
+      // 本地记录兜底
+      this.orders = this.bridgeSdk.getStorageSync("recycle_orders") || [];
+      // 优先从云开发读取（按 openid 隔离）
+      this.ordersLoading = true;
+      try {
+        const res = await getAppointments();
+        if (res && res.success && Array.isArray(res.list)) {
+          this.orders = res.list;
+        }
+      } catch (e) {
+        console.warn("云端读取预约失败，使用本地记录", e);
+      } finally {
+        this.ordersLoading = false;
+      }
     },
-
-    // 积分商城
-    jumppointMall(){
-      this.bridgeSdk.jumpPage({
-        url: "/package-intergral-mall/index/index",
-        // needLogin: true,
-        title: "在线商城"
-      })
+    async previewOrderImages(images, index) {
+      if (!images || images.length === 0) return;
+      // 云文件ID需要先换成临时链接，previewImage 才能打开
+      const urls = await toTempFileURLs(images);
+      uni.previewImage({ urls, current: urls[index] });
     },
-    jumpToMyOrder(){
-      this.bridgeSdk.jumpPage({
-        url: "/package-money-transactions/payment/record",
-        needLogin: true,
-        title: "我的订单"
-      })
+    toLogin() {
+      this.bridgeSdk.toLogin();
+    },
+    goEstimate() {
+      this.bridgeSdk.jumpPage({ url: "/pages/estimate/estimate" });
+    },
+    goAbout() {
+      this.bridgeSdk.jumpPage({ url: "/pages/about/about" });
+    },
+    goFeedback() {
+      this.bridgeSdk.jumpPage({ url: "/pages/feedback/feedback" });
+    },
+    async loadAdminStatus() {
+      let cloudAdmin = false;
+      try {
+        const res = await callFunction("adminGetAppointments", { action: "me" });
+        cloudAdmin = !!(res && res.success && res.isAdmin);
+      } catch (e) {
+        console.warn("查询管理员状态失败", e);
+      }
+      // 已绑定管理员 或 本地长按解锁（用于首次绑定）
+      this.isAdmin = cloudAdmin || !!this.bridgeSdk.getStorageSync("admin_entry_unlocked");
+    },
+    unlockAdmin() {
+      this.isAdmin = true;
+      this.bridgeSdk.setStorageSync("admin_entry_unlocked", true);
+      this.bridgeSdk.showToast({ title: "管理入口已开启" });
+    },
+    goAdmin() {
+      this.bridgeSdk.jumpPage({ url: "/pages/admin/appointments" });
+    },
+    goCategories() {
+      this.bridgeSdk.jumpPage({ url: "/pages/admin/categories" });
+    },
+    call() {
+      this.bridgeSdk.makePhoneCall({ phoneNumber: this.phone });
+    },
+    // 点击二维码可放大查看，长按识别添加微信
+    previewQr() {
+      if (this.qrError) return;
+      uni.previewImage({
+        urls: [this.qrCodeUrl],
+        current: this.qrCodeUrl,
+      });
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-#demoDiv {
-  // padding-top: 50rpx;
-  // min-height: calc(100vh);
-  box-sizing: border-box;
-}
-
-.top-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+.mine {
   width: 750rpx;
-  min-height: 100vh;
-  // background: linear-gradient(180deg, #FEF1DE 0%, #FFF 30%, #FFF 100%);
-  background: linear-gradient( 180deg, #FEF1DE 0%, rgba(255,245,232,0) 100%);
-  // background: linear-gradient( 180deg, #FEF1DE 0%, rgba(255,245,232,0) 100%);
-  z-index: -1;
-}
-
-.main {
+  height: 100%;
+  background: #f5f6f8;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  overflow: hidden;
+}
+
+/* 「我的」内容滚动容器：内容不超出时不会产生滚动/回弹 */
+.mine-scroll {
+  flex: 1;
+  height: 0;
+  /* 留白高度 = 底栏内容高(96rpx) + 底部安全区，避免露出灰底 */
+  padding-bottom: calc(96rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
-.login-box {
-  width: 702rpx;
-  box-sizing: border-box;
-  padding: 68rpx 46rpx 54rpx;
+.user-card {
+  margin: 24rpx;
+  padding: 40rpx 32rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
 
-  .no-login {
-    width: 100%;
+  .user {
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
+    align-items: center;
 
-    .headImg {
-      width: 150rpx;
-      height: 150rpx;
+    // 头像按钮（微信 chooseAvatar 只能挂在 button 上）
+    .avatar-btn {
+      position: relative;
+      width: 120rpx;
+      height: 120rpx;
+      padding: 0;
+      margin: 0;
+      border: none;
       border-radius: 50%;
+      background: transparent;
+      line-height: 1;
       flex-shrink: 0;
-      margin-right: 30rpx;
-      overflow: hidden;
-    }
+      overflow: visible;
 
-    .login-info-box {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-
-      .tit {
-        font-weight: 800;
-        font-size: 36rpx;
-        color: #060000;
-        line-height: 50rpx;
-        letter-spacing: 1px;
-        margin-bottom: 18rpx;
+      &::after {
+        border: none;
       }
 
-      .content {
-        height: 62rpx;
-        font-size: 24rpx;
-        color: #333333;
-        font-weight: 700;
-      }
-    }
-  }
-
-  .login-container {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-
-    .user-icon {
-      width: 150rpx;
-      height: 150rpx;
-      margin-right: 30rpx;
-
-      .user-icon-img {
-        width: 150rpx;
-        height: 150rpx;
+      .avatar {
+        display: block;
+        width: 120rpx;
+        height: 120rpx;
         border-radius: 50%;
-        flex-shrink: 0;
-        // margin-right: 30rpx;
-        overflow: hidden;
+        background: #fff;
+      }
+      .avatar-edit {
+        position: absolute;
+        right: -6rpx;
+        bottom: -6rpx;
+        width: 40rpx;
+        height: 40rpx;
+        border-radius: 50%;
+        background: #fff;
+        color: #16a34a;
+        font-size: 20rpx;
+        line-height: 40rpx;
+        text-align: center;
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
       }
     }
 
-    .login-container-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+    .user-info {
+      margin-left: 28rpx;
+      color: #fff;
+      flex: 1;
+      min-width: 0;
 
-      .login-container-info-name {
-        font-weight: 800;
+      .user-name-row {
+        display: flex;
+        align-items: center;
+      }
+      .user-name {
+        max-width: 320rpx;
         font-size: 36rpx;
-        color: #060000;
-        line-height: 50rpx;
-        letter-spacing: 1px;
-        margin-bottom: 18rpx;
-        width: 450rpx;
-        white-space: nowrap;
+        font-weight: bold;
         overflow: hidden;
+        white-space: nowrap;
         text-overflow: ellipsis;
       }
-
-      .login-container-info-level {
-          height: 62rpx;
-          display: flex;
-          justify-content: flex-start;
-          align-items: center;
-
-          .level-icon {
-            width: 176rpx;
-            height: 62rpx;
-            margin-right: 22rpx;
-          }
-          .real_box{
-             width: 160rpx;
-            height: 42rpx;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient( 92deg, #1D85F0 0%, #56A5F8 100%);
-            border-radius: 22rpx;
-            font-weight: bold;
-            font-size: 16rpx;
-            color: #FFFFFF;
-            .real_name_icon {
-              width: 28rpx;
-              height: 28rpx;
-              margin-right: 8rpx;
-            }
-          }
-
-
-        .level-num {
-          font-weight: bold;
-          font-size: 16rpx;
-          color: #FFFFFF;
-        }
-      }
-    }
-  }
-}
-
-.point_card {
-  width: 702rpx;
-  height: 162rpx;
-  background: #FFFFFF;
-  border-radius: 12rpx;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-bottom: 26rpx;
-
-  .point_card_item {
-    width: 45%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .point_card_icon {
-      width: 66rpx;
-      height: 66rpx;
-    }
-
-    .point_card_content {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-
-      .point_card_title {
-        font-weight: 800;
-        font-size: 30rpx;
-        color: #090000;
-        line-height: 42rpx;
-        text-align: center;
-      }
-
-      .point_card_num {
-        font-weight: bold;
-        font-size: 36rpx;
-        color: #090000;
-        line-height: 50rpx;
-        text-align: center;
-      }
-    }
-  }
-
-  .gray_line {
-    width: 1px;
-    height: 40rpx;
-    background: #e5e5e5;
-  }
-}
-
-.toRechargeBox {
-  width: 700rpx;
-  height: 76rpx;
-  padding-left: 14rpx;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(252, 225, 189, 0.86);
-  border-radius: 12rpx;
-
-  .toRechargeImg {
-    height: 76rpx;
-    flex-shrink: 0;
-    margin-right: 20rpx;
-  }
-
-  .toRechargeTitleImg {
-    width: 148rpx;
-    height: 30rpx;
-    flex-shrink: 0;
-    margin-right: 10rpx;
-  }
-  .toRechargeTitle{
-    font-size: 24rpx;
-    color: #d4830b;
-    line-height: 40rpx;
-  }
-
-  .toRechargeText {
-    font-weight: 900;
-    font-size: 30rpx;
-    color: #d4830b;
-    line-height: 40rpx;
-    flex-grow: 1;
-  }
-
-  .toRechargeBtn {
-    width: 165rpx;
-    height: 76rpx;
-    border-radius: 0 12rpx 12rpx 0;
-    background: linear-gradient( 270deg, #FBBD67 0%, #F29515 100%);
-    // background: #F29515;
-    font-weight: bold;
-    font-size: 30rpx;
-    color: #FFFFFF;
-    line-height: 42rpx;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-  }
-}
-
-.member-box {
-  width: 750rpx;
-  position: relative;
-  margin-top: 22rpx;
-
-  .current-title {
-    position: absolute;
-    top: 0;
-    left: 24rpx;
-    z-index: 1;
-    width: 150rpx;
-    height: 40rpx;
-    background: rgba(255, 255, 255, 0.5);
-    border-top-left-radius: 40rpx;
-    border-bottom-right-radius: 40rpx;
-    text-align: center;
-    line-height: 40rpx;
-    font-size: 22rpx;
-    color: #ffffff;
-  }
-
-  .member-card {
-    width: 100%;
-    height: 300rpx;
-  }
-
-  .member-un-login {
-    width: 100%;
-    height: 288rpx;
-
-    .member-un-login-img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-}
-
-.my-order {
-  width: 704rpx;
-  margin-top: 20rpx;
-  // position: relative;
-  // top: -40rpx;
-  background: #ffffff;
-  border-radius: 12rpx;
-  box-sizing: border-box;
-
-  .my-order-title {
-    width: 126rpx;
-    height: 30rpx;
-    padding-left: 38rpx;
-    padding-top: 32rpx;
-
-    .my-order-title-icon {
-      width: 126rpx;
-      height: 30rpx;
-    }
-  }
-
-  .my-order-content {
-    width: 100%;
-    padding: 38rpx 120rpx 48rpx;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .my-order-item {
-      width: 120rpx;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .my-order-icon {
-        width: 74rpx;
-        height: 74rpx;
-        margin-bottom: 26rpx;
-      }
-
-      .my-order-name {
-        width: 120rpx;
-        font-weight: 800;
-        font-size: 26rpx;
-        color: #060000;
-        line-height: 36rpx;
-        letter-spacing: 1px;
-        text-align: center;
-      }
-    }
-
-    .gray_line {
-      width: 1px;
-      height: 40rpx;
-      background: #e5e5e5;
-    }
-  }
-}
-
-.more-service {
-  width: 702rpx;
-  background: #FFFFFF;
-  border-radius: 12rpx;
-  margin-top: 40rpx;
-
-  .more-service-title {
-    width: 126rpx;
-    height: 30rpx;
-    padding-left: 38rpx;
-    padding-top: 32rpx;
-
-    .more-service-title-icon {
-      width: 126rpx;
-      height: 30rpx;
-    }
-  }
-
-  .more-service-content {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 56rpx 10rpx 32rpx;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-wrap: wrap;
-
-    .more-service-item {
-      width: 25%;
-      padding: 10rpx 0;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-
-      .more-service-icon {
-        width: 64rpx;
-        height: 64rpx;
-        margin-bottom: 24rpx;
-      }
-
-      .more-service-name {
-        width: 100%;
-        font-weight: 800;
-        font-size: 22rpx;
-        color: #060000;
+      .user-name-edit {
+        margin-left: 16rpx;
+        padding: 0 14rpx;
+        height: 36rpx;
         line-height: 32rpx;
-        letter-spacing: 1px;
-        text-align: center;
+        border: 2rpx solid rgba(255, 255, 255, 0.7);
+        border-radius: 18rpx;
+        font-size: 20rpx;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .user-name-input {
+        width: 340rpx;
+        height: 60rpx;
+        padding: 0 20rpx;
+        border-radius: 30rpx;
+        background: rgba(255, 255, 255, 0.95);
+        color: #111827;
+        font-size: 30rpx;
+        box-sizing: border-box;
+      }
+      .user-sub {
+        margin-top: 10rpx;
+        font-size: 26rpx;
+        opacity: 0.9;
+      }
+      .user-tip {
+        margin-top: 6rpx;
+        font-size: 22rpx;
+        opacity: 0.8;
       }
     }
   }
+}
+
+.section {
+  margin: 0 24rpx 24rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-title {
+    font-size: 30rpx;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 16rpx;
+  }
+
+  .section-more {
+    font-size: 26rpx;
+    color: #16a34a;
+    margin-bottom: 16rpx;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 40rpx 0;
+
+  .empty-text {
+    font-size: 26rpx;
+    color: #9ca3af;
+  }
+  .empty-btn {
+    margin: 20rpx auto 0;
+    width: 220rpx;
+    height: 64rpx;
+    border-radius: 32rpx;
+    background: #ecfdf5;
+    color: #16a34a;
+    font-size: 26rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.order-more {
+  margin-top: 16rpx;
+  padding: 16rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #16a34a;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+
+  .grid-item {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20rpx 0;
+    box-sizing: border-box;
+  }
+
+  .grid-icon {
+    width: 88rpx;
+    height: 88rpx;
+    border-radius: 22rpx;
+    color: #fff;
+    font-size: 34rpx;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.icon-contact {
+      background: #22c55e;
+    }
+    &.icon-about {
+      background: #fbbf24;
+    }
+    &.icon-feedback {
+      background: #f59e0b;
+    }
+    &.icon-admin {
+      background: #8b5cf6;
+    }
+    &.icon-category {
+      background: #f97316;
+    }
+  }
+
+  .grid-name {
+    margin-top: 12rpx;
+    font-size: 24rpx;
+    color: #374151;
+    text-align: center;
+  }
+}
+
+.order-list {
+  .order-item {
+    padding: 20rpx 0;
+    border-bottom: 2rpx solid #f3f4f6;
+
+    .order-main {
+      display: flex;
+      justify-content: space-between;
+
+      .order-name {
+        font-size: 28rpx;
+        color: #1f2937;
+        font-weight: 500;
+      }
+      .order-price {
+        font-size: 28rpx;
+        color: #f59e0b;
+        font-weight: bold;
+      }
+    }
+    .order-sub {
+      margin-top: 8rpx;
+      font-size: 24rpx;
+      color: #9ca3af;
+    }
+
+    .order-images {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 12rpx;
+
+      .order-image {
+        width: 120rpx;
+        height: 120rpx;
+        margin-right: 12rpx;
+        margin-top: 8rpx;
+        border-radius: 8rpx;
+        background: #f3f4f6;
+      }
+    }
+  }
+}
+
+.menu {
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 24rpx 0;
+    border-bottom: 2rpx solid #f3f4f6;
+
+    .menu-icon {
+      width: 64rpx;
+      height: 64rpx;
+      border-radius: 16rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28rpx;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .icon-contact { background: #22c55e; }
+    .icon-setting { background: #60a5fa; }
+    .icon-about { background: #fbbf24; }
+    .icon-feedback { background: #f59e0b; }
+    .icon-admin { background: #8b5cf6; }
+
+    .menu-name {
+      flex: 1;
+      margin-left: 24rpx;
+      font-size: 30rpx;
+      color: #1f2937;
+    }
+    .menu-arrow {
+      font-size: 40rpx;
+      color: #d1d5db;
+    }
+  }
+}
+
+.contact-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .contact-pop {
+    width: 560rpx;
+    background: #fff;
+    border-radius: 24rpx;
+    padding: 48rpx 40rpx;
+    text-align: center;
+
+    .contact-title {
+      font-size: 34rpx;
+      font-weight: bold;
+      color: #111827;
+    }
+    .contact-qr {
+      display: block;
+      width: 320rpx;
+      height: 320rpx;
+      margin: 32rpx auto 20rpx;
+      background: #f3f4f6;
+      border-radius: 16rpx;
+    }
+    .contact-qr-placeholder {
+      width: 320rpx;
+      height: 320rpx;
+      margin: 32rpx auto;
+      background: #f3f4f6;
+      border-radius: 16rpx;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      .placeholder-line {
+        font-size: 20rpx;
+        color: #9ca3af;
+        line-height: 34rpx;
+      }
+    }
+    .contact-desc {
+      font-size: 26rpx;
+      color: #16a34a;
+      font-weight: 500;
+    }
+    .contact-phone {
+      margin-top: 24rpx;
+      height: 76rpx;
+      border-radius: 38rpx;
+      background: #22c55e;
+      color: #fff;
+      font-size: 28rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .contact-footer-tip {
+      margin-top: 24rpx;
+      padding-top: 20rpx;
+      border-top: 2rpx dashed #e5e7eb;
+      font-size: 24rpx;
+      color: #16a34a;
+      line-height: 34rpx;
+    }
+  }
+}
+</style>
+
+<!-- 非 scoped：小程序各页面 wxss 相互独立，此规则只作用于「我的」页面 -->
+<style lang="scss">
+page {
+  height: 100vh;
+  overflow: hidden;
 }
 </style>

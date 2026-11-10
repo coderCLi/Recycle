@@ -20,6 +20,11 @@ let fetching = false;
  * 如果个别页面逻辑依赖于token和实时用户信息（接口请求token拦截无需单独处理，已经统一处理），页面中methods直接定义callFun方法即可
  */
 export function requestToken(_httParams?: any) {
+    // 云开发方案：小程序端不再使用旧后端 token，直接返回，避免相对路径请求在真机上报 invalid url
+    // #ifdef MP
+    return Promise.resolve(null);
+    // #endif
+    // #ifndef MP
     return new Promise(async (resolve, reject) => {     
         const { keyStr, encryptString, setStorageSync, getStorageSync, isInHiApp, aesDecrypt } = bridgeSdk;
         const { setUserInfo } = utils;
@@ -132,6 +137,7 @@ export function requestToken(_httParams?: any) {
             resolve(null);
         }
     });
+    // #endif
 }
 
 export const callFun = () => {

@@ -1,0 +1,9 @@
+{
+  "name": "adminGetAppointments",
+  "version": "1.0.0",
+  "description": "管理端查询全部预约并支持更新状态",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

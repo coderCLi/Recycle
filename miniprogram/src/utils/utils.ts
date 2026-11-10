@@ -230,10 +230,13 @@ export const clearToken = () => {
 export const clearAppStorage = () => {
   removeStorageSync('job_position_list_cache');
   removeStorageSync('job_industry_list_cache');
+  // #ifdef H5
+  // 小程序真机没有 location，仅在 H5 下读取 URL 参数
   let { query, path } = getUrlObj(location.href)
   if(query.appToken) {
     removeStorageSync("appToken");
   }
+  // #endif
   removeStorageSync("thirdInitCode");
   clearUserInfo();
   clearToken();
@@ -1571,15 +1574,20 @@ export const showConfirm = ({
   confirmCallback: () => {},
   cancelCallback: () => {},
 } as any) => {
-  beans.getGlobalThis().$refs.modal.open({
-    title,
-    content,
-    htmlString,
-    confirmText,
-    cancelText,
-    showCancel,
-    confirmCallback,
-    cancelCallback,
+  // 改用原生 modal：原实现依赖页面内 vc-modal 组件，未引入时会报 $refs.modal undefined
+  uni.showModal({
+    title: title || '温馨提示',
+    content: content || htmlString || '',
+    confirmText: confirmText || '确定',
+    cancelText: cancelText || '取消',
+    showCancel: showCancel !== false,
+    success: (res: any) => {
+      if (res.confirm) {
+        confirmCallback && confirmCallback();
+      } else {
+        cancelCallback && cancelCallback();
+      }
+    },
   });
 }
 
@@ -1599,13 +1607,15 @@ export const showAlert = ({
   confirmText: '确定',
   confirmCallback: () => {}
 } as any) => {
-  beans.getGlobalThis().$refs.modal.open({
-    title,
-    content,
-    htmlString,
-    confirmText,
+  // 改用原生 modal：原实现依赖页面内 vc-modal 组件，未引入时会报 $refs.modal undefined
+  uni.showModal({
+    title: title || '温馨提示',
+    content: content || htmlString || '',
+    confirmText: confirmText || '确定',
     showCancel: false,
-    confirmCallback
+    success: (res: any) => {
+      if (res.confirm) confirmCallback && confirmCallback();
+    },
   });
 }
 
@@ -1619,11 +1629,18 @@ export const showToast = ({
   title: '',
   duration: 2000
 } as any) => {
-  beans.getGlobalThis().$refs.modal.open({
-    type: 'toast',
-    title,
-    duration
-  });
+  // 改用原生 toast：原实现依赖页面内 vc-modal 组件的 $refs.modal，
+  // 未引入该组件的页面会抛 "Cannot read property 'open' of undefined"
+  try {
+    uni.showToast({
+      title: title || '',
+      duration: duration || 2000,
+      icon: 'none',
+      mask: false,
+    });
+  } catch (e) {
+    console.warn('showToast 失败', e);
+  }
 }
 
 /**

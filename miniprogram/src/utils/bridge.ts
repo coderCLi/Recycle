@@ -38,18 +38,23 @@ export const getEnvironment = async (): Promise<string> => {
       resolve(_currentEnv);
       return;
     }
-    // @ts-ignore
-    hi.getEnvironment({
-      success(res) {
-        // console.log(res.data)
-        _currentEnv = res.data.env;
-        resolve(_currentEnv);
-      },
-      fail(res) {
-        console.log("hi.getEnvironment fail: ", res);
-        resolve("unknown");
-      },
-    });
+    try {
+      // @ts-ignore
+      hi.getEnvironment({
+        success(res) {
+          // console.log(res.data)
+          _currentEnv = res.data.env;
+          resolve(_currentEnv);
+        },
+        fail(res) {
+          console.log("hi.getEnvironment fail: ", res);
+          resolve("unknown");
+        },
+      });
+    } catch (e) {
+      console.warn("getEnvironment 调用异常（非 App 环境正常现象）", e);
+      resolve("unknown");
+    }
   });
 };
 
@@ -627,7 +632,10 @@ export const openOuterPage = async (params: { url: string; title: string; extra_
     //     "&title=" +
     //     encodeURIComponent(params.title),
     // });
-    window.open(params.url, "_blank");
+    // 小程序真机没有 window，必须判断
+    if (typeof window !== "undefined") {
+      window.open(params.url, "_blank");
+    }
     // 打开新页面
     // window.location.href = params.url;
   }

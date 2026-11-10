@@ -1,7 +1,7 @@
 {
-    "name" : "大连海创嗨创生活1.0",
+    "name" : "富区回收",
     "appid" : "__UNI__FBCDD13",
-    "description" : "",
+    "description" : "富区回收 —— 手机、电脑、家电上门回收，在线估价、免费上门、当面结款",
     "versionName" : "1.0.0",
     "versionCode" : "100",
     "transformPx" : false,
@@ -42,7 +42,8 @@
     },
     "quickapp" : {},
     "mp-weixin" : {
-        "appid" : "wx1666b148380cd848",
+        "appid" : "wx3d3c2d5d5ac27f26",
+        "cloudfunctionRoot" : "cloudfunctions/",
         "setting" : {
             "urlCheck" : true,
             "es6" : true,

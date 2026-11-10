@@ -39,7 +39,11 @@
     document.title = query.title ? decodeURIComponent(query.title) : "";
     // #endif
 
-    await launchInit();
+    try {
+      await launchInit();
+    } catch (e) {
+      console.warn("launchInit 失败（不影响使用）", e);
+    }
 
     const baseStore = useBaseStore();
 
@@ -48,9 +52,13 @@
     // console.log("全部页面", JSON.stringify(allPages, null, '\t'));
     baseStore.setAllPages(allPages);
 
-    // 当前环境
-    const _env: string = await getEnvironment();
-    // console.log("当前环境", _env);
+    // 当前环境（失败不阻塞）
+    let _env = "unknown";
+    try {
+      _env = await getEnvironment();
+    } catch (e) {
+      console.warn("getEnvironment 失败", e);
+    }
     // 设置当前环境
     baseStore.setRunEnv(_env);
 

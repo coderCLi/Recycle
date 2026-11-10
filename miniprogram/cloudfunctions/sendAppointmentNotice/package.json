@@ -1,0 +1,9 @@
+{
+  "name": "sendAppointmentNotice",
+  "version": "1.0.0",
+  "description": "下发预约回收通知（一次性订阅消息）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

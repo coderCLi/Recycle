@@ -7,6 +7,7 @@
  * @Remark: https://cn.vite.dev/config/build-options
  */
 import path from 'node:path'
+import fs from 'node:fs'
 import dayjs from 'dayjs'
 import { defineConfig, loadEnv } from 'vite'
 import Uni from '@dcloudio/vite-plugin-uni'
@@ -197,6 +198,27 @@ export default ({ command, mode }) => {
       }),
 
       progress(),
+      // 云函数目录同步到编译产物，供微信开发者工具右键上传部署
+      UNI_PLATFORM === 'mp-weixin' && {
+        name: 'copy-cloudfunctions',
+        closeBundle() {
+          try {
+            const src = path.join(process.cwd(), 'cloudfunctions')
+            const distDir = path.join(process.cwd(), 'dist', mode === 'development' ? 'dev' : 'build', 'mp-weixin')
+            const dest = path.join(distDir, 'cloudfunctions')
+            if (fs.existsSync(src) && fs.existsSync(distDir)) {
+              // 排除 node_modules：云函数依赖走「云端安装」，本地依赖不能同步进小程序项目（会让包体积暴涨到上百 M）
+              fs.cpSync(src, dest, {
+                recursive: true,
+                filter: (source) => !source.includes('node_modules')
+              })
+              console.log('\x1b[32m%s\x1b[0m', '云函数已同步到 -> ' + dest)
+            }
+          } catch (e) {
+            console.warn('云函数同步失败：', e.message)
+          }
+        }
+      },
     ],
 
     define: defineExports,

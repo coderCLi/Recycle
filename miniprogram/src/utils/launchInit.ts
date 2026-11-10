@@ -157,8 +157,12 @@ export default async function launchInit () {
         baseStore.setStatusBarHeight(defaultStatusBarHeight);
       }
 
-      // 获取交易凭证
-      await requestToken();
+      // 获取交易凭证（旧后端 token，云开发方案已不需要，停用避免真机访问内网地址失败）
+      // try {
+      //   await requestToken();
+      // } catch (e) {
+      //   console.warn("获取旧后端 token 失败（不影响云开发功能）", e);
+      // }
 
       trackReport.initTrack();
       

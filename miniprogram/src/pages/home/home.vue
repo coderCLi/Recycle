@@ -1,1137 +1,862 @@
 <!--
- * @Description: 应用主页，也用于管理端配置小程序首页时可视化展示用
- * @Author: yulongchen
- * @Date: 2024-11-23 17:13:38
- * @LastEditors: yulongchen 1053061950@qq.com
- * @LastEditTime: 2025-07-29 14:26:03
- * @Remark: 
+ * @Description: 首页（废旧家电上门回收）
+ * @Author: chilei gchilei0815@gmail.com
 -->
 <template>
-  <vc-modal ref="modal"></vc-modal>
-  
-  <view class="main" @click="togglePopover">
+  <view>
+    <vc-container :props-data="containerProps">
+      <view class="home">
 
-    <!-- <view :style="`position: fixed; top: ${0}px; left: ${0}px; width: 60px; height: 40px; z-index: 1001; background: green;`" @click="showMaskMethod(showMaskIndex)"></view> -->
-    <vc-guide-mask ref="guideMask" v-show="maskShow[0] && maskShow[1] && maskShow[2]" :props-data="maskPropsData" @updateServiceIndexForMask="updateServiceIndexForMask" @getEleThat="getEleThat"></vc-guide-mask>
+        <!-- 骨架屏 -->
+        <vc-skeleton v-if="pageLoading" type="home" />
 
-    <!-- 状态栏 -->
-    <!-- <vc-status-bar /> -->
-
-    <!-- <button @click="download('https://izhuzi.top/hbd-uniapp-static/docs/1.doc')">1.doc</button>
-    <button @click="download('https://izhuzi.top/hbd-uniapp-static/docs/2.png')">2.png</button>
-    <button @click="download('https://izhuzi.top/hbd-uniapp-static/docs/3.pptx')">3.pptx</button>
-    <button @click="download('https://izhuzi.top/hbd-uniapp-static/docs/4.docx')">4.docx</button>
-    <button @click="download('https://izhuzi.top/hbd-uniapp-static/docs/5.xlsx')">5.xlsx</button>
-    <button @click="download('https://izhuzi.top/hbd-uniapp-static/docs/6.pdf')">6.pdf</button>
-    <button @click="download('https://izhuzi.top/hbd-uniapp-static/docs/7.zip')">7.zip</button> -->
-
-    <view
-      class="" 
-      style="z-index: 1"
-    >
-      <!-- 背景 -->
-      <!-- <view class="top-bg"></view> -->
-
-      <!-- <weather-area ref="weatherArea" id="weatherArea" class="sticky-top" style="z-index: 2" :props-data="weatherPropsData">
-        <view class="service-type">
-          <template v-if="serviceTypeList.length &gt; 1">
-            <text
-              class="service-type-text"
-              v-for="(item, index) in serviceTypeList"
-              :key="index"
-              :class="`${serviceIndex === index ? 'serviceActive' : ''} ${item.tagClass ? item.tagClass: ''}`"
-              @click="toggleServiceType(item, index)"
-              >{{ item.subjectName }}
-            </text>
-          </template>
-        </view>
-        <template v-slot:message>
-          <view class="dot" v-if="messageCount > 0">{{ messageCount > 99 ? "99" : messageCount }}</view>
-        </template>
-      </weather-area> -->
-
-      <!-- 顶部logo -->
-      <!-- <view class="sticky-top header-logo" :style="'padding-top:' + navigationBarInfo.safeAreaTop + 'px;'">
-        <image
-          class="header-logo"
-          :src="staticBaseUrl + '/hbdimage/main/images/home/logo.png'"
-          mode="scaleToFill"
-        />
-      </view> -->
-
-      <vc-header-logo></vc-header-logo>
-
-      <!-- 搜索 -->
-      <!-- <vc-search-box
-        class="sticky-top"
-        :style="{ top: searchStickTop + 'px' }"
-        @toSearch="toSearch"
-        :props-data="searchPropsData"
-      ></vc-search-box> -->
-      <view class="home_main" :style="{height: 'calc(100vh - ' + (navigationBarInfo.statusBarHeight + navigationBarInfo.navigationBarHeight) + 'px)'}">
-        <!-- <image class="home_main_bg"
-          :src="minioBaseUrl + 'common/tabbarImages/home_bgimg_pattern_img.png'"
-          mode="scaleToFill"
-        /> -->
-        <!-- class="cpa-relative cpa-px-12-5" -->
-
-        <!-- 轮播图 -->
-          <!-- <vc-banner v-if="serviceData.isShowBanner && serviceData.isShowBanner == '1' " :props-data="ba.value" @toPage="toPage"></vc-banner> -->
-
-          <!-- 黄金区 -->
-          <!-- <vc-gold v-if="serviceData.isShowGolden && serviceData.isShowGolden == '1' " :props-data="goldDataInfo.value" @toPage="toPage"></vc-gold> -->
-
-          <!-- 金刚区 -->
-          <!-- <vc-menus ref="kongKim" v-if="serviceData.isShowKong && serviceData.isShowKong == '1'" :props-data="kongKimDataInfo.value" @toPage="toPage"></vc-menus> -->
-        
-        <view class="home_main_item" v-for="(item, index) in dataList" :key="index">
-          <!-- 轮播图 -->
-          <!-- 生活与便民服务数据源不同 -->
-          <vc-banner v-if="serviceData.isShowBanner && serviceData.isShowBanner == '1' && item.showType == 'banner'" :props-data="item.value" @toPage="toPage" style="width: 690rpx; height: 288rpx; margin-left: 30rpx;"></vc-banner>
-          
-          <!-- 黄金区 -->
-          <vc-gold v-if="serviceData.isShowGolden && serviceData.isShowGolden == '1' && item.showType == 'golden'" :props-data="item.value" @toPage="toPage"></vc-gold>
-          
-          <!-- 金刚区 -->
-          <vc-menus ref="kongKim" v-if="serviceData.isShowKong && serviceData.isShowKong == '1' && item.showType == 'kongKim'" :props-data="item.value" @toPage="toPage"></vc-menus>
-          <view class="space-top"></view>
-          <!-- 特色专区 -->
-          <!-- v-if="serviceData.isShowGolden && serviceData.isShowGolden == '1'" -->
-          <vc-special ref="TSBK" v-if="item.showType == 'TSBK'" :props-data="item.value" @toPage="toPage"></vc-special>
-
-          <!-- v-if="serviceData.isShowGolden && serviceData.isShowGolden == '1'" -->
-          <!-- <view v-if="item.showType == 'TSBK'" class="space-top"></view> -->
-
-          <!-- 轻banner -->
-           <view class="hf-title-box" v-if="item.showType == 'HF'">
-            <!-- <image
-            class="hf-title-img"
-              :src="minioBaseUrl + 'common/tabbarImages/home_title_label_img.png'"
-              mode="scaleToFill"
-            /> -->
-            <text class="hf-title-img"></text>
-            <text class="hf-title-text">领券中心</text>
-           </view>
-          <vc-banner v-if="item.showType == 'HF'" :props-data="item.value" @toPage="toPage" style="width: 690rpx; height: 180rpx; border-radius: 90rpx !important;"></vc-banner>
-          <!-- <view v-if="item.showType == 'HF'" class="space-top"></view> -->
-
-          <!-- 活动专区 -->
-          <vc-activity v-if="item.showType == 'HDBK'" :props-data="item.value" @toPage="toPage"></vc-activity>
-          <!-- <view v-if="item.showType == 'HDBK'" class="space-top"></view> -->
-
-          <!-- 通知公告、资讯 -->
-          <vc-notice v-if="item.showType == 'ZX'" :props-data="item.value" @toPage="toPage"></vc-notice> 
-          <!-- <view v-if="item.showType == 'ZX'" class="space-top"></view> -->
-
-          <!-- 区县专区 -->
-          <vc-distinct v-if="item.showType == 'ZQ'" :props-data="item.value" @toPage="toPage"></vc-distinct>
-          <view v-if="item.showType == 'ZQ'" class="safe-space"></view>
-        </view>
-
-
-        <!-- 特色专区 -->
-        <!-- v-if="serviceData.isShowGolden && serviceData.isShowGolden == '1'" -->
-        <!-- <vc-special :props-data="specialZonePropsData" @toPage="toPage"></vc-special> -->
-
-        <!-- v-if="serviceData.isShowGolden && serviceData.isShowGolden == '1'" -->
-        <!-- <view class="safe-space"></view> -->
-
-        <!-- 轻banner -->
-        <!-- <template v-if="this.adListPropsData.props.list.value && this.adListPropsData.props.list.value.length &gt; 0">
-          <vc-banner :props-data="adListPropsData" @toPage="toPage"></vc-banner>
-          <view class="safe-space"></view>
-        </template> -->
-
-        <!-- 活动专区 -->
-        <!-- <vc-activity :props-data="activityZonePropsData"></vc-activity>
-
-        <view class="safe-space"></view> -->
-
-        <!--- 生活与便民区分服务 -->
-        <!-- 便民服务 -->
-        <!-- <template v-if="serviceType == '便民'">
-          通知公告
-          <vc-notice :props-data="noticePropsData"></vc-notice>
-
-          区县专区
-          <vc-distinct :props-data="distinctPropsData"></vc-distinct>
-        </template> -->
-        <!--- 生活服务 -->
-       <!-- <template v-if="serviceType == '生活'">
-          <view class="service-type service-type-life">
-            <text
-              class="service-type-text"
-              :class="{ serviceActive: lifeServiceType === item.value }"
-              v-for="(item, index) in lifeServiceTypeList"
-              :key="index"
-              @click="toggleLifeServiceType(item)"
-              >{{ item.name }}</text
-            >
+        <!-- 引导显示时禁止滚动：首页内容改由 scroll-view 承载 -->
+        <scroll-view v-else class="home-scroll" scroll-y :scroll-y="!showGuide">
+        <!-- 主视觉 -->
+        <view class="hero">
+          <view class="hero-title">旧家电 免费上门</view>
+          <view class="hero-sub">冰箱 · 洗衣机 · 空调 · 电视 · 电脑</view>
+          <view class="hero-tags">
+            <text class="hero-tag">免费上门</text>
+            <text class="hero-tag">免费拆机</text>
+            <text class="hero-tag">当场结款</text>
           </view>
-          <vc-waterfall ref="uWaterfallRef"></vc-waterfall>
-        </template> -->
+          <view class="hero-actions">
+            <view id="guide-estimate" class="hero-btn primary" @click="goEstimate()">立即估价</view>
+            <view class="hero-btn ghost" @click="callPhone">电话咨询</view>
+          </view>
+        </view>
 
+        <!-- 回收品类 -->
+        <view class="section-head">
+          <text class="section-title">回收品类</text>
+          <text class="section-more" @click="goEstimate()">全部 ›</text>
+        </view>
+        <view id="guide-category" class="cat-grid">
+          <view
+            v-for="c in categories"
+            :key="c.key"
+            class="cat-item"
+            @click="goEstimate(c)"
+          >
+            <view class="cat-icon" :style="{ background: c.bg }">{{ c.icon }}</view>
+            <view class="cat-name">{{ c.name }}</view>
+            <view class="cat-price">{{ c.priceRange }}</view>
+          </view>
+        </view>
+
+        <!-- 服务保障 -->
+        <view class="section-title">服务保障</view>
+        <view class="promise-grid">
+          <view v-for="p in promises" :key="p.name" class="promise-item">
+            <view class="promise-icon">{{ p.icon }}</view>
+            <view class="promise-name">{{ p.name }}</view>
+            <view class="promise-desc">{{ p.desc }}</view>
+          </view>
+        </view>
+
+        <!-- 回收流程 -->
+        <view class="section-title">回收流程</view>
+        <view class="flow">
+          <view v-for="(f, i) in flows" :key="f" class="flow-item">
+            <view class="flow-dot">{{ i + 1 }}</view>
+            <view class="flow-name">{{ f }}</view>
+          </view>
+        </view>
+
+        <!-- 常见问题 -->
+        <view class="section-title">常见问题</view>
+        <view class="faq">
+          <view
+            v-for="(q, i) in faqs"
+            :key="i"
+            class="faq-item"
+            @click="toggleFaq(i)"
+          >
+            <view class="faq-q">
+              <text class="faq-q-text">{{ q.q }}</text>
+              <text class="faq-arrow" :class="{ open: faqOpen === i }">▾</text>
+            </view>
+            <view v-if="faqOpen === i" class="faq-a">{{ q.a }}</view>
+          </view>
+        </view>
+
+        <!-- 底部 CTA -->
+        <view class="bottom-cta">
+          <view class="cta-btn primary" @click="callPhone">一键拨号</view>
+          <view id="guide-contact" class="cta-btn ghost" @click="showContact = true">加微信咨询</view>
+        </view>
+
+        <view class="footer-tip">服务范围：富区及周边 20 公里</view>
+
+        <!-- 联系我们 -->
+        <view v-if="showContact" class="mask" @click="showContact = false">
+          <view class="contact-card" @click.stop>
+            <view class="contact-title">联系我们</view>
+            <image
+              v-if="!qrError"
+              class="contact-qr"
+              :src="qrCodeUrl"
+              mode="aspectFit"
+              @error="qrError = true"
+            />
+            <view v-else class="contact-qr-placeholder">
+              <text class="placeholder-line">请把微信二维码命名为</text>
+              <text class="placeholder-line">weixin-qrcode.png</text>
+              <text class="placeholder-line">放到 src/static/images/ 下</text>
+            </view>
+            <view class="contact-phone" @click="callPhone">电话：{{ phone }}</view>
+            <view class="contact-close" @click="showContact = false">关闭</view>
+          </view>
+        </view>
+
+        <vc-safe-bottom />
+
+        </scroll-view>
+
+        <!-- 首次进入引导（聚光灯压屏） -->
+        <view v-if="showGuide" class="guide-layer" @touchmove.stop.prevent="noop">
+          <!-- 挖洞高亮框：外面的 box-shadow 铺满全屏做压暗 -->
+          <view class="spotlight" :style="spotlightStyle">
+            <view class="spotlight-inner"></view>
+          </view>
+
+          <!-- 手指指向（仅最后一步） -->
+          <view v-if="guideSteps[guideIndex].finger" class="guide-finger" :style="fingerStyle">
+            <text class="finger-icon">👆</text>
+          </view>
+
+          <!-- 气泡提示 -->
+          <view class="guide-bubble" :style="bubbleStyle">
+            <view class="bubble-title">{{ guideSteps[guideIndex].title }}</view>
+            <view class="bubble-desc">{{ guideSteps[guideIndex].desc }}</view>
+            <view class="bubble-footer">
+              <text class="bubble-step">{{ guideIndex + 1 }} / {{ guideSteps.length }}</text>
+              <view class="bubble-btn" @click="nextGuide">{{ guideBtnText }}</view>
+            </view>
+          </view>
+
+          <!-- 跳过 -->
+          <view class="guide-skip" @click="closeGuide">
+            <text>跳过引导</text>
+          </view>
+        </view>
 
       </view>
-    </view>
+    </vc-container>
 
-    <!-- <image
-      :src="staticBaseUrl + '/hbdimage/main/images/home/zhangzhe.png'"
-      class="parentMode"
-      @click="toOpenNewWin('/oldman')"
-      mode="widthFix"
-    ></image> -->
-
-    <!-- <vc-safe-bottom /> -->
-
-	  <!--广告提示-->
-    <template v-if="adPropsData.props.list.value.length > 0">
-      <vc-ad ref="ad" :props-data="adPropsData" @toPage="toPage" @close="adClose"></vc-ad>
-    </template>
-
+    <vc-tabbar current="home" />
   </view>
 </template>
 
 <script>
-	import {
-    getHomeWeather,
-		getHomeData,
-		getHomeVersion,
-		getSearchInit,
-    getNotifyCount,
-    adList,
-    checkTips
-	} from "@/api/home";
-  import { login } from '@/utils/wxLogin';
-  import pagesjson from '@/pages.json'
-  
-	import vcSearchBox from "@/components/library/base/vc-search-box/index.vue";
-	import vcGold from "@/components/library/base/vc-gold/index.vue";
-	import vcHeaderLogo from "@/components/library/base/vc-header-logo/index.vue";
-	import vcBanner from "@/components/library/base/vc-banner/index.vue";
-	import vcMenus from "@/components/library/base/vc-menus/index.vue";
-	import vcSpecial from "@/components/library/base/vc-special/index.vue";
-	import vcActivity from "@/components/library/base/vc-activity/index.vue";
-	import vcNotice from "@/components/library/base/vc-notice/index.vue";
-	import vcDistinct from "@/components/library/base/vc-distinct/index.vue";
-	import weatherArea from "@/components/library/base/vc-weather-area/index.vue";
-	import vcWaterfall from "@/components/library/base/vc-waterfall/index.vue";
-	import vcAd from "@/components/library/base/vc-ad/index.vue";
-  import vcGuideMask from "@/components/library/base/vc-guide-mask/index.vue";
-	import {
-		mapState
-	} from "pinia";
-	import {
-		useBaseStore,
-		useUserStore
-	} from "@/store/index";
-	export default {
-		name: "home",
-		components: {
-			vcSearchBox,
-			vcGold,
-			vcBanner,
-			vcMenus,
-			vcSpecial,
-			vcActivity,
-			vcNotice,
-			vcDistinct,
-			weatherArea,
-			vcWaterfall,
-			vcAd,
-      vcGuideMask,
-      vcHeaderLogo,
-		},
-		computed: {
-			...mapState(useBaseStore, {
-				navH: "navH",
-				navigationBarInfo: "navigationBarInfo",
-			}),
-			...mapState(useUserStore, {
-				userInfo: "userInfo",
-        isLogined: "isLogined",
-			}),
-		},
-		data() {
-			return {
-        pagesjson,
-        messageCount: 0,
-        maskShow: [0, 0, 0],
-        maskPropsData: {
-					props: {
-            maskRectList: {
-              value: []
-            }
-					}
-				},
-        dataList: [],
-        bannerDataInfo: {},
-        goldDataInfo: {},
-        kongKimDataInfo: {},
-        weatherPropsData: {
-					props: {
-						// weather: {
-            //   value: "" 
-            // },
-            // temperature: {
-            //   value: "" 
-            // },
-            messageCount: {
-              value: 0
-            }
-					}
-				},
-        adPropsData: {
-					props: {
-						list: {
-							value: []
-						}
-					}
-				},
-				searchPropsData: {
-					props: {
-						placeholder: {
-							value: '请输入关键字'
-						}
-					}
-				},
-				goldZonePropsData: {
-					props: {
-						list: {
-							value: []
-						}
-					}
-				},
-				serviceData: {},
-				serviceIndex: 0,
-				serviceType: "",
-        serviceDefaultType: "",
-        serviceTypeList: [],
-        lifeServiceTypeList: [
-          {
-            name: "精选优惠",
-            value: "1",
-          },
-          {
-            name: "特色热卖",
-            value: "2",
-          },
-        ],
-        lifeServiceType: "1",
-        bannersPropsData: {
-          props: {
-            height: {
-              value: 260,
-            },
-            width: {
-              value: 690,
-            },
-            list: {
-              value: [],
-            },
-          },
-        },
-        menusPropsData: {
-          props: {
-            list: {
-              value: [],
-            },
-          },
-        },
-        adListPropsData: {
-          props: {
-            height: {
-              value: 152,
-            },
-            width: {
-              value: 704,
-            },
-            list: {
-              value: [],
-            },
-          },
-        },
+import vcSkeleton from "@/components/library/base/vc-skeleton/vc-skeleton.vue";
+import vcTabbar from "@/components/library/base/vc-tabbar/vc-tabbar.vue";
 
-        searchStickTop: "",
-        moreList: [ // 更多
-          { showType: 'ZX', moreType: 'ZX-MORE' },
-          { showType: 'ZQ', moreType: 'ZQ-MORE' },
-          { showType: 'HDBK', moreType: 'HDBK-MORE' },
-        ]
+export default {
+  name: "home",
+  components: { vcSkeleton, vcTabbar },
+  data() {
+    return {
+      containerProps: {
+        props: {
+          title: { value: "富区回收" },
+          isFullScreen: { value: true },
+          containerBackground: { value: "#f5f6f8" },
+        },
+      },
+      phone: "13130009661",
+      categories: [
+        { key: "fridge", name: "冰箱", icon: "箱", priceRange: "100-800元", bg: "#3b82f6" },
+        { key: "washer", name: "洗衣机", icon: "洗", priceRange: "80-600元", bg: "#06b6d4" },
+        { key: "aircon", name: "空调", icon: "空", priceRange: "200-1000元", bg: "#8b5cf6" },
+        { key: "tv", name: "电视", icon: "视", priceRange: "50-500元", bg: "#f59e0b" },
+        { key: "computer", name: "电脑", icon: "脑", priceRange: "200-7000元", bg: "#10b981" },
+        { key: "other", name: "其他家电", icon: "他", priceRange: "50-400元", bg: "#6b7280" },
+      ],
+      promises: [
+        { icon: "免", name: "免费上门", desc: "大件不收费" },
+        { icon: "拆", name: "免费拆机", desc: "专业师傅" },
+        { icon: "款", name: "当面结款", desc: "验完即付" },
+        { icon: "保", name: "环保处理", desc: "正规拆解" },
+      ],
+      flows: ["在线估价", "预约上门", "当面验机", "当场付款"],
+      faqs: [
+        { q: "大件家电怎么搬走？", a: "我们免费上门，拆机、搬运都由师傅负责，你不用动手。" },
+        { q: "价格怎么算的？", a: "按品类、品牌、使用年限和成色综合估价，最终以当面验机为准。" },
+        { q: "上门收费吗？", a: "免费上门，不满意可以不卖，不收任何费用。" },
+      ],
+      faqOpen: -1,
+      showContact: false,
+      qrError: false,
+      // 首屏骨架屏（仅冷启动首次展示）
+      pageLoading: true,
+      // 首次进入引导
+      showGuide: false,
+      guideIndex: 0,
+      guideSteps: [
+        {
+          target: "#guide-category",
+          title: "这些都能回收",
+          desc: "冰箱、洗衣机、空调、电视、电脑，点一下直接预约",
+          position: "top",
+          finger: false,
+        },
+        {
+          target: "#guide-estimate",
+          title: "点击这里开始估价",
+          desc: "选好品类和成色，30 秒看到预估价格，不满意不收费",
+          position: "bottom",
+          finger: true,
+        },
+      ],
+      spotlight: { top: 0, left: 0, width: 0, height: 0 },
+      bubblePos: { top: 0, left: 0 },
+    };
+  },
+  computed: {
+    qrCodeUrl() {
+      return "/static/images/weixin-qrcode.png";
+    },
+    guideBtnText() {
+      return this.guideIndex < this.guideSteps.length - 1 ? "下一步" : "我知道了";
+    },
+    /** 手指指向位置：高亮框下方居中 */
+    fingerStyle() {
+      const s = this.spotlight;
+      const size = 64;
+      return {
+        top: s.top + s.height + 6 + "px",
+        left: s.left + s.width / 2 - size / 2 + "px",
       };
     },
+    spotlightStyle() {
+      const s = this.spotlight;
+      return {
+        top: s.top + "px",
+        left: s.left + "px",
+        width: s.width + "px",
+        height: s.height + "px",
+      };
+    },
+    bubbleStyle() {
+      return {
+        top: this.bubblePos.top + "px",
+      };
+    },
+  },
   onShow() {
-    this.bridgeSdk.beans.setGlobalThis(this);
-    console.log("isLogined", this.isLogined);
-    this.getNotifyCount();
-  },
-  onHide() {
-    this.bridgeSdk.beans.removeGlobalThis(this);
-  },
-  onPullDownRefresh() {
-    console.log("刷新");
-    if(this.h5Iframe){
-      uni.stopPullDownRefresh();
+    // 隐藏原生 tabBar，改用自定义底栏（中间突起「回收」按钮）
+    try {
+      uni.hideTabBar({ animation: false });
+    } catch (e) {
+      console.warn("隐藏原生 tabBar 失败", e);
+    }
+
+    // 骨架屏：仅冷启动首次展示，之后进入直接显示内容
+    if (this.bridgeSdk.getStorageSync("home_warmed")) {
+      this.pageLoading = false;
     } else {
-      this.__loadData__();
-      setTimeout(function () {
-        uni.stopPullDownRefresh();
-      }, 1000);
-    }
-	},
-  async onLoad(options) {
-    this.onShareAppMessageData = {
-      // 转发标题，当前小程序名称	
-      title: "首页",
+      setTimeout(() => {
+        this.pageLoading = false;
+        this.bridgeSdk.setStorageSync("home_warmed", true);
+      }, 450);
     }
 
-    // this.bridgeSdk.jumpPage({
-    //   url: "/package-speed-park/pages/speed-park"
-    // });
-
-    // console.log("decimal plus", this.bridgeSdk.decimal.plus(0.1, 0.2));
-    // console.log("decimal minus", this.bridgeSdk.decimal.minus(0.1, 0.2));
-    // console.log("decimal multiply", this.bridgeSdk.decimal.multiply(0.1, 0.2));
-    // console.log("decimal divide", this.bridgeSdk.decimal.divide(0.1, 0.2));
-    // console.log("decimal eq", this.bridgeSdk.decimal.eq(this.bridgeSdk.decimal.plus(0.1, 0.2), 0.3));
-    
-    this.trackReport.trackPageView("首页");
-
-    let that = this
-    this.h5Iframe = false
-    // #ifdef H5
-    this.h5Iframe = location?.href?.indexOf('channel=h5Iframe') > -1
-    // #endif
-
-    // #ifdef MP
-    // getHomeWeather({"cityCode":"130600"}, {mask: false}).then((res)=> {
-    //   // console.log("getHomeWeather({}).then(res=> {  ---------", res)
-    //   // console.dir(res);
-    //   const weatherData = {
-    //     weather: "",
-    //     temperature: ""
-    //   };
-    //   if (res) {
-    //     weatherData.weather = res.text || "";
-    //     weatherData.temperature = res.temp || "";
-    //   }
-    //   const baseStore = useBaseStore();
-    //   baseStore.updateWeather(weatherData);
-    // });
-    // #endif
-
-    if(this.h5Iframe){
-      console.log("页面来自于iframe内嵌")
-
-      // 接受子页面发来的信息
-      window.addEventListener('message', function(event) {
-        console.log("h5Iframe message",event)
-        var messageData = event.data;
-        that.serviceTypeList = JSON.parse(messageData.data || "[]")
-        let subjectId = messageData.subjectId
-        let index = that.serviceTypeList.findIndex(item => item.subjectId === subjectId)
-        console.log(index)
-        if(index == -1){
-          that.serviceIndex = 0
-        }else{
-          that.serviceIndex = index
-        }
-        that.updateServiceType();
-        that.handleHomeData()
-      });
-      that.$nextTick(() => {
-        document.addEventListener("click", function(event) {
-          event.stopPropagation();
-          event.preventDefault();
-        }, true)
-        // 移除tabbar
-        const cleardom = document.querySelectorAll('.uni-tabbar-bottom')
-        Array.from(cleardom).forEach((item) => {
-          item.remove()
-        })
-      })
+    // 首次进入引导（一个设备只显示一次）
+    if (!this.bridgeSdk.getStorageSync("guide_shown")) {
+      setTimeout(() => {
+        this.showGuide = true;
+        this.updateGuidePosition();
+      }, 800);
     }
-    else{
-      this.__loadData__();
-      this.adList();
-    }
-
-  },
-  // onReachBottom() {
-    // 生活服务才触发
-    // this.serviceType == "生活" && this.$refs.uWaterfallRef.loadMore();
-  // },
-  onReady() {
-    setTimeout(() => {
-      const query = uni.createSelectorQuery().in(this);
-      query
-        .select("#weatherArea")
-        .boundingClientRect((data) => {
-          console.log("得到布局位置信息：" + JSON.stringify(data));
-          this.searchStickTop = data?.height;
-          console.log("搜索框吸顶距离：" + this.searchStickTop);
-        })
-        .exec();
-    }, 1000);
-
-    if(this.h5Iframe){
-      // 发送消息给父页面
-      console.log("发送消息给父页面")
-      window.top.postMessage("页面加载完成", location.origin)
-    }
-
-  },
-  onUnload() {
-    // uni.off('update')
-  },
-  onPageScroll(e) {
-    // console.log("页面滚动", e);
-    uni.$emit("pageScroll", e);
   },
   methods: {
-    getEleThat(showType) {
+    goEstimate(item) {
+      const url =
+        item && item.key
+          ? "/pages/estimate/estimate?category=" + item.key
+          : "/pages/estimate/estimate";
+      this.bridgeSdk.jumpPage({ url });
     },
-    togglePopover() {
-      // this.$refs.weatherArea.toggle();
+    callPhone() {
+      this.bridgeSdk.makePhoneCall({ phoneNumber: this.phone });
     },
-    // download(url){
-    //   this.bridgeSdk.downloadFile({
-    //     url: url
-    //   });
-    // },
-    async __loadData__() {
-      await this.checkVersion();
-      // await this.getSearchInit();
-      // this.getNotifyCount();
-      
-      // this.getHomeWeather();
+    toggleFaq(i) {
+      this.faqOpen = this.faqOpen === i ? -1 : i;
     },
-    checkVersion() {
-      return new Promise((resolve, reject) => {
-        getHomeVersion({})
-          .then(async (res) => {
-            console.log("getHomeVersion ");
-            console.dir(res);
-            let homepageInfo = this.bridgeSdk.getStorageSync('homepageInfo');
-
-            let oldVersion = "";
-            if (homepageInfo && homepageInfo.list && homepageInfo.list.length > 0) {
-              oldVersion = homepageInfo.list[0].newVersion
-            }
-            if (res && res.newVersion && oldVersion && res.newVersion == oldVersion) {
-              let _res = homepageInfo;
-              if (_res != null && _res.list != null && _res.list.length > 0) {
-                this.serviceDefaultType = this.serviceType.length > 0 ? this.serviceType : _res.isDefault || "";
-                console.log("this.serviceDefaultType = 11 " +  this.serviceDefaultType);
-                if (Object.prototype.toString.call(_res.list) === "[object Array]") {
-                  this.serviceTypeList = _res.list;
-                  this.updateServiceIndex();
-                  console.log("新旧版本一致，不拉取 新的数据");
-                  console.log("新旧版本一致，不拉取 新的数据 this.serviceTypeList", this.serviceTypeList)
-                  this.handleHomeData();
-                  resolve(res);
-                  return;
-                }
-              }
-            }
-            await this.getHomeData();
-            resolve(res);
-          })
-          .catch(async (error) => {
-            console.log("getHomeVersion error---1");
-            // Toast.clear();
-            // Toast("网络异常，请稍后重试");
-            await this.getHomeData();
-            reject(error);
-          });
-      });
-    },
-    getHomeData() {
-      return new Promise((resolve, reject) => {
-        getHomeData({queryDefault: 1})
-          .then((res) => {
-            console.log("getHomeData ");
-            console.dir(res);
-            if (res != null && res.list != null && res.list.length > 0) {
-              this.serviceDefaultType = this.serviceType.length > 0 ? this.serviceType : res.isDefault || "";
-              if (Object.prototype.toString.call(res.list) === "[object Array]") {
-                let listData = res.list[0].showList;
-                let index = listData.findIndex(item => item.showType == 'banner');
-                let bannerData = {};
-                if(index > -1){
-                  bannerData = listData[index];
-                  listData.splice(index, 1);
-                  listData.unshift(bannerData);
-                }
-                let resData = res
-                resData.list[0].showList = listData
-                this.bridgeSdk.setStorageSync("homepageInfo", {...resData});
-                this.serviceTypeList = resData.list;
-                this.updateServiceIndex();
-                this.handleHomeData();
-              }
-            }
-            resolve(res);
-          })
-          .catch((e) => {
-            console.dir(e);
-            console.log("getHomeData error---1");
-            // Toast.clear();
-            // Toast("网络异常，请稍后重试");
-            reject(e);
-          });
-      });
-    },
-    updateServiceType() {
-      let _list = this.serviceTypeList;
-      if (_list.length <= this.serviceIndex) {
-        if (_list.length === 0) return;
-        this.serviceIndex = 0;
-      }
-      // 开始处理后台数据
-      let bigDic = _list[this.serviceIndex] || {};
-      this.serviceType = bigDic.subjectName;
-    },
-    updateServiceIndex() {
-      if (!this.serviceDefaultType || this.serviceDefaultType.length == 0) {
-        return;
-      }
-      let _list = this.serviceTypeList;
-      if (!_list || _list.length == 0) {
-        this.serviceIndex = 0;
-        return;
-      }
-      let str = this.serviceDefaultType;
-      let index = _list.findIndex((bigDic)=> {
-        return str === bigDic.subjectName
-      });
-      if (index < 0) {
-        return;
-      }
-      this.serviceIndex = index;
-      // 开始处理后台数据
-      let bigDic = _list[this.serviceIndex] || {};
-      this.serviceType = bigDic.subjectName;
-    },
-    updateServiceIndexForMask(subjectName) {
-      this.serviceDefaultType = subjectName;
-      if (Object.prototype.toString.call(this.serviceTypeList) === "[object Array]") {
-        this.updateServiceIndex();
-        this.handleHomeData();
-      }
-    },
-    // 根据serviceIndex处理数据
-    handleHomeData() {
-      // 根据不同type，映射图片数据为photoId、photoUrl、staticUrl、跳转路径等
-      let photoIdFunc = (dic, type) => {
-        let bkType = dic.showType;
-        dic.serviceList = dic.serviceList.map((element, index) => {
-          element.showType = bkType;
-          element.prefectureType = dic.prefectureType; // prefectureType 专区类型枚举： 1-区县专区
-          // 如果是资讯，特殊处理
-          if (bkType == "ZX") {
-            element.tag = (element.tag && element.tag.length > 0) ? element.tag : element.photoUrl;
-          }
-          element.photoId = element.photoId ? element.photoId : element[`${type}PhotoId`];
-
-          let tempUrl = element.photoUrl ? element.photoUrl : element[`${type}PhotoUrl`];
-          tempUrl = tempUrl ? tempUrl : element[`smallPhotoUrl`];
-          // 因为是相对路径，防止重复拼接根路径
-          if (element.photoUrl && element.photoUrl.includes(this.minioBaseUrl)) {
-            element.photoUrl = tempUrl;
-          } else if (tempUrl) {
-            element.photoUrl = this.minioBaseUrl + tempUrl;
-          } else {
-            element.photoUrl = null;
-          }
-
-          element.imgurl = element.photoUrl;
-          element.staticUrl = element.photoUrl;
-          element.name = element.serviceName;
-          element.id = element.serviceId;
-          // element.path = element.url; // 直接使用.url
-          // element.isTips = element.isTips
-          // element.tipText = element.tipText
-
-          let ele = this.maskPropsData.props.maskRectList.value.find(m => m.showType === bkType && (m.index - 1) === index);
-          if (ele) {
-            element.tagClass = ele.tagId
-          }
-
-          return element;
+    // 引导层用：占位方法，配合 @touchmove.stop.prevent 锁住页面滚动
+    noop() {},
+    measureTarget(selector) {
+      return new Promise((resolve) => {
+        const query = uni.createSelectorQuery().in(this);
+        query.select(selector).boundingClientRect();
+        query.exec((res) => {
+          resolve(res && res[0] ? res[0] : null);
         });
-        return dic;
+      });
+    },
+    async updateGuidePosition() {
+      const step = this.guideSteps[this.guideIndex];
+      if (!step) return;
+
+      const rect = await this.measureTarget(step.target);
+      if (!rect) {
+        this.closeGuide();
+        return;
+      }
+
+      const pad = 8;
+      this.spotlight = {
+        top: rect.top - pad,
+        left: rect.left - pad,
+        width: rect.width + pad * 2,
+        height: rect.height + pad * 2,
       };
-      console.log("首页数据 --------------------------serviceIndex " + this.serviceIndex);
-      console.log("首页数据 handleHomeData this.serviceTypeList", this.serviceTypeList);
-      let res = this.serviceTypeList || [];
-      if (res.length <= this.serviceIndex) {
-        console.log("---if (res.length <= this.serviceIndex) {", res.length, this.serviceIndex);
-        if (res.length === 0) return;
-        console.log("---if (res.length === 0) return;");
-        this.serviceIndex = 0;
-      }
-      console.log("开始处理数据1 --------------------------serviceIndex " + this.serviceIndex);
-      res.forEach((item, index) => {
-        let ele = this.maskPropsData.props.maskRectList.value.find(m => m.showType === 'big' && (m.index - 1) === index);
-        if (ele) {
-          item.tagClass = ele.tagId
-        }
-      });
-      // 开始处理后台数据
-      let bigDic = res[this.serviceIndex] || {};
-      this.updateServiceType();
-      this.serviceData = bigDic;
-      let _list = [];
-      if (
-        bigDic &&
-        Object.prototype.toString.call(bigDic.showList) === "[object Array]"
-      ) {
-        console.log("开始处理数据2 --------------------------");
 
-        let _moreStrs = this.moreList.map(e=>e.moreType);
-        let _shwTypeStrs = this.moreList.map(e=>e.showType);
-        let _showList = [...bigDic.showList].filter(e => {
-          return !_moreStrs.includes(e.showType)
-        });
-        let _moreDic = [];
-        for (const mreIte of this.moreList) {
-          const shwType = mreIte.showType;
-          let mreType = mreIte.moreType;
-          let _zxMore1 = [...bigDic.showList].find(e => {
-            return e.showType == mreType;
-          });
-          if (_zxMore1 && _zxMore1.serviceList.length > 0) { _moreDic[shwType] = _zxMore1.serviceList[0] }
-        }
-        
+      // 气泡位置：优先目标下方，空间不足则放到上方
+      const sys = uni.getSystemInfoSync();
+      const winH = sys.windowHeight || 667;
+      const bubbleH = 210;
+      const gap = 24;
+      let top;
 
-
-        _showList.forEach((element) => {
-          let _dic = { showType: element.showType,
-            value: { props: { list: { value: [] }, height: { value: 0 },width: { value: 0 }, title: {value: ""}, moreItem: {value: {}}, swiperType: {value: {}}, } }
-          }
-
-          let picTag = "small";
-          // 如果是banner数据
-          if (element.showType === "banner") {
-            picTag = "banner";
-            // 如果是黄金区数据、金刚区数据、扩展banner
-          } else if (["golden", "kongKim", "HF"].includes(element.showType)) {
-            picTag = "middle";
-            // 如果是特色专区、活动专区、区县
-          } else if (["TSBK", "HDBK", "ZQ"].includes(element.showType)) {
-            picTag = "big";
-            // 如果是资讯
-          } else if (["ZX"].includes(element.showType)) {
-          }
-          let _serviceList = photoIdFunc(element, picTag).serviceList;
-
-          let moreEle = this.maskPropsData.props.maskRectList.value.find(m => m.showType === 'kongKim' && _dic.showType === 'kongKim' && (m.index - 1) === _dic.value.props.list.value.length);
-          if (moreEle) {
-            _dic.value.props.moreItem.value = {'tagClass':  moreEle.tagId }
-          }
-          
-          let orderFlagItm = _serviceList.find((e)=>{
-            return e.orderFlag == 0 || e.orderFlag == '0';
-          });
-          _serviceList = _serviceList.filter((e)=>{
-            return e.orderFlag != 0 && e.orderFlag != '0';
-          });
-          if (orderFlagItm) {
-            _serviceList.push(orderFlagItm);
-          }
-
-          // 处理更多
-          console.log('-----------_shwTypeStrs--', _shwTypeStrs, _moreDic, element.showType)
-          if (_shwTypeStrs.includes(element.showType) && _moreDic[element.showType]) {
-            _dic.value.props.list.value = [..._serviceList, _moreDic[element.showType]];
-          } else {
-            _dic.value.props.list.value = _serviceList;
-          }
-
-          if (element.showType === "banner") {
-            _dic.value.props.height.value = 260; // 单位是rpx
-            _dic.value.props.width.value = 690; // 单位是rpx
-            _dic.value.props.swiperType.value = "banner"
-          } else if (element.showType === "HF") {
-            _dic.value.props.height.value = 180;
-            _dic.value.props.width.value = 690; // 单位是rpx
-          }
-          if (element.title && element.title.length > 0) {
-            _dic.value.props.title.value = element.title;
-          } else {
-            _dic.value.props.title = null;
-          }
-          _list.push(_dic);
-        });
-        this.dataList = _list;
-        console.log("dataList ----------", this.dataList);
-        this.$set(this, "dataList", this.dataList);
-        this.$set(this, "bannersPropsData", this.bannersPropsData);
-        this.$set(this, "goldZonePropsData", this.goldZonePropsData);
-        this.$set(this, "menusPropsData", this.menusPropsData);
-        this.$set(this, "adListPropsData", this.adListPropsData);
-        this.$set(this, "specialZonePropsData", this.specialZonePropsData);
-        this.openMask(1);
-      }
-      console.log("开始处理数据3 --------------------------");
-    },
-    // 获取搜索框占位文字
-    getSearchInit() {
-      return new Promise((resolve, reject) => {
-        let orderFlag = this.serviceIndex + 1 + ""; // 左面1，右面2
-        let type = "1"; // 主页1    更多2  主页入口能查新闻和服务，更多服务入口只能查服务
-        let data = {
-          orderFlag: orderFlag,
-          type: type
-        };
-        getSearchInit(data, {mask: false})
-          .then((res) => {
-            if (res.searchText && res.searchText.length > 0) {
-              this.searchPropsData.props.placeholder.value = res.searchText;
-              this.$set(this, "searchPropsData", this.searchPropsData);
-            }
-            resolve(res);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
-    // 切换服务类型
-    toggleServiceType(item, index) {
-      this.serviceIndex = index;
-      
-      const info = this.serviceTypeList[index];
-      console.log("切换服务类型", info);
-      this.trackReport.trackCustom(info.subjectName);
-
-      this.updateServiceType();
-      this.handleHomeData();
-    },
-    // toggleLifeServiceType(item) {
-    //   this.lifeServiceType = item.value;
-    // },
-    // ...mapActions(useBaseStore, ['setNavH']),
-    // jumpToH5(){
-    //   this.bridgeSdk.jumpPage({
-    //     url: '/pages/h5/h5?url=https://www.baidu.com&needLogin=flase'
-    //   });
-    // }
-    toPage(item) {
-      console.log("toPage", item);
-      let path = item.url;
-      console.log("hoem " + path)
-      
-      // 处理url   --- 写死的
-      // 区县专区
-      // if (item.showType == 'ZQ' && item.prefectureType == 1) {permissionLevel总是为null
-      if (item.showType == 'ZQ' && item.orderFlag != '0' && item.permissionLevel == 1) { // permissionLevel等于1，表示区县专区的
-        path = `/package-quxian-info/pages/quxianInfo?homepagePrefectureId=${item.serviceExampleId}`
-      // 资讯
-      } else 
-      if (item.showType == 'ZX' && !path) {
-        path = `/package-general-services/information/detail?id=${item.serviceExampleId}`
-      }
-      if (path && path.includes("/package-more")) {
-        let orderFlag = this.serviceIndex + 1 + ""; // 左面1，右面2
-        let type = "2"; // 主页1    更多2  主页入口能查新闻和服务，更多服务入口只能查服务
-
-        let fuhao = path.indexOf('?') > -1 ? '&' : '?'
-        path = `${path}${fuhao}pageType=${type}&orderFlag=${orderFlag}`;
-      }
-      this.bridgeSdk.toServicePage(path, item, this.serviceData.subjectId);
-    },
-    toSearch() {
-      let orderFlag = this.serviceIndex + 1 + ""; // 左面1，右面2
-      let type = "1"; // 主页1    更多2  主页入口能查新闻和服务，更多服务入口只能查服务
-      this.bridgeSdk.jumpPage({
-        url: `/package-search/home/index?pageType=${type}&orderFlag=${orderFlag}`
-      });
-    },
-    // 长者模式跳转
-    toOpenNewWin(e) {
-      this.bridgeSdk.jumpPage({
-        needLogin: false,
-        url: '/page-elderl-mode/elderly/elderlyMode',
-    
-      });
-    },
-    // 获取消息数据
-    getNotifyCount() {
-      // 如果是登录状态，则获取
-      if (this.bridgeSdk.getUserInfo()) {
-        console.log("去登录 --- 用户信息")
-        console.dir(this.bridgeSdk.getUserInfo());
-        getNotifyCount({}, {mask: false}).then(res=> {
-          console.log("getNotifyCount().then(res=> {--------")
-          console.dir(res);
-          if (Object.prototype.toString.call(res.count) == '[object String]') {
-            this.messageCount = res.count.length > 0 ? parseInt(res.count) : 0;
-          } else {
-            this.messageCount = res.count || 0;
-          }
-          this.weatherPropsData.props.messageCount.value = this.messageCount;
-          
-          console.log("messageCount " + this.messageCount);
-        });
+      if (step.position === "top") {
+        top = rect.top - bubbleH - gap;
+        if (top < 110) top = rect.bottom + gap;
       } else {
-        console.log("未登录home");
-        this.messageCount = 0;
-        this.weatherPropsData.props.messageCount.value = this.messageCount;
-      }
-    },
-    adList() {
-      // adType 广告类型：1-弹窗广告；3-全屏广告
-      adList({adType: 1}).then(res=> {
-        console.log("adList({adType: 1}).then(res=> {  ---------")
-        console.dir(res);
-        if (res && res.length > 0) {
-          this.adPropsData.props.list.value = res;
-          this.$nextTick(() => {
-            this.$refs.ad.open();
-          });
-        } else {
-          this.adPropsData.props.list.value = [];
-          this.getCheckTips(()=>{
-            this.openMask(0)
-          });
-          
+        top = rect.bottom + gap;
+        if (top + bubbleH > winH - 100) {
+          top = rect.top - bubbleH - gap;
         }
-      }).catch((err)=>{
-        this.getCheckTips(()=>{
-          this.openMask(0)
-        });
-      });
-    },
-    openMask(index) {
-      if (this.maskShow[index] == 1) {
-        return;
       }
-      this.maskShow[index] = 1;
-      console.log('----------open Mask(index) {--' + index, this.maskShow)
-      if (this.maskShow[0] && this.maskShow[1] && this.maskShow[2]) {
-        setTimeout(()=>{
-            console.log('开始显示引导')
-            this.$refs.guideMask.showMaskMethod(0);
-        },50);
+
+      // 兜底：无论上下都保证气泡落在可视区内
+      const maxTop = winH - bubbleH - 100;
+      this.bubblePos = {
+        top: Math.max(110, Math.min(top, maxTop)),
+        left: 24,
+      };
+    },
+    async nextGuide() {
+      if (this.guideIndex < this.guideSteps.length - 1) {
+        this.guideIndex += 1;
+        await this.updateGuidePosition();
+      } else {
+        this.closeGuide();
       }
     },
-    adClose() {
-      this.getCheckTips(()=>{
-        this.openMask(0)
-      });
+    closeGuide() {
+      this.showGuide = false;
+      this.bridgeSdk.setStorageSync("guide_shown", true);
     },
-    getCheckTips(successFunc) {
-      // #ifdef MP
-      login().then((res)=> {
-        const code = res && res.code ? res.code : ''
-        checkTips({code}).then((res)=> {
-          if (res && res.flag == 1) {
-            this.handleTipsResult(res);
-            successFunc&&successFunc();
-          }
-        })
-      })
-      // #endif
-      // #ifdef H5
-      checkTips({}).then((res)=> {
-          this.handleTipsResult(res);
-          successFunc&&successFunc();
-      })
-      // #endif
-    },
-    handleTipsResult(res) {
-      // if (res && res.flag == 1) {
-          let _list = (res.list || []).filter(e=>{
-            return e.isShow == 1 && ['index', 'button', 'kongKim', 'TSBK'].includes(e.showType);
-          });
-          _list.sort((a, b) => Number(a.tipsNumber) - Number(b.tipsNumber));
-
-          _list = _list.map((e)=> {
-            const _typeDic = {
-              index: 'big',
-              button: 'tabbar',
-              kongKim: 'kongKim',
-              TSBK: 'TSBK'
-            }
-            return {
-              ...e,
-              showTypeOld: e.showType,
-              showType: _typeDic[e.showType],
-              index: Number(e.showNumber),
-              mask: true,
-              tagId: 'mask' + this.bridgeSdk.generateUUID(),
-              rect: {x: 0, y: 0, w: 0, h: 0},
-              method: null,
-              contentText: (e.tipsTitle && e.tipsTitle.length > 0 ? `<span style="color: #01BEB8; font-size: 28rpx; line-height: 36rpx; font-weight: bold;">${e.tipsTitle}</span><br/>` : '') + `${e.tipsContent}`
-            }
-          })
-
-          this.maskPropsData.props.maskRectList.value = _list;
-          if (_list.length > 0) {
-            this.handleHomeData()
-            this.openMask(2)
-          }
-        // }
-    }
-    // getHomeWeather() {
-    //   getHomeWeather({"cityCode":"130600"}, {mask: false}).then(res=> {
-    //     console.log("getHomeWeather({}).then(res=> {  ---------")
-    //     console.dir(res);
-    //     if (res) {
-    //       this.weatherPropsData.props.weather.value = res.text || "";
-    //       this.weatherPropsData.props.temperature.value = res.temp || "";
-    //     } else {
-    //       this.weatherPropsData.props.weather.value = "";
-    //       this.weatherPropsData.props.temperature.value = "";
-    //     }
-    //     const baseStore = useBaseStore();
-    //     baseStore.updateWeather({
-    //       weather: this.weatherPropsData.props.weather.value,
-    //       temperature: this.weatherPropsData.props.temperature
-    //     });
-    //   });
-    // }
   },
-  onShareAppMessage(res) {
-    this.trackReport.trackCustom("分享微信-" + this.onShareAppMessageData.title);
-    return this.bridgeSdk.onShareAppMessage(this.onShareAppMessageData);
-  }
 };
-
 </script>
 
 <style lang="scss" scoped>
-.dot {
-  background: #EE0032;
-  position: absolute;
-  top: -6rpx;
-  right: -3rpx;
-  font-weight: 500;
-  font-size: 14rpx;
-  height: 18rpx;
-  border-radius: 9rpx;
-  min-width: 18rpx;
-  text-align: center;
-  line-height: 18rpx;
-  color: #FFFFFF;
-}
-.parentMode {
-  position: fixed;
-  bottom: 40%;
-  right: 0;
-  width: 50rpx;
-  height: 140rpx;
-  border-radius: 16rpx 0 0 16rpx;
-  z-index: 999;
-}
-
-.main {
-  background: #f5f5f5;
-  position: relative;
-  
-}
-
-.service-type {
+.home {
+  width: 750rpx;
+  height: 100%;
+  background: #f5f6f8;
+  box-sizing: border-box;
   display: flex;
-  align-items: center;
-  width: 200rpx;
-  justify-content: space-between;
-  height: 80rpx;
-  padding: 0 20rpx;
-  font-size: 30rpx;
-  color: #000;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-  &-text {
-    margin-right: 20rpx;
-    position: relative;
-    top: 2px;
-    flex-shrink: 0;
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: -12rpx;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40rpx;
-      height: 8rpx;
-      background: linear-gradient(132deg, #00bcb8 0%, #11ffbc 100%), #00bcb9;
-      border-radius: 4px;
-      background: transparent;
+/* 首页内容滚动容器：引导显示时 scroll-y=false，彻底锁住滚动 */
+.home-scroll {
+  flex: 1;
+  height: 0;
+  /* 留白高度 = 底栏内容高(96rpx) + 底部安全区，避免露出灰底 */
+  padding-bottom: calc(96rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.hero {
+  margin: 24rpx;
+  padding: 40rpx 32rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+
+  .hero-title {
+    font-size: 46rpx;
+    font-weight: bold;
+    color: #fff;
+    letter-spacing: 2rpx;
+  }
+  .hero-sub {
+    margin-top: 16rpx;
+    font-size: 26rpx;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20rpx;
+
+    .hero-tag {
+      padding: 6rpx 18rpx;
+      margin: 0 12rpx 12rpx 0;
+      border-radius: 20rpx;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 22rpx;
+      color: #fff;
     }
+  }
+  .hero-actions {
+    display: flex;
+    margin-top: 20rpx;
 
-    &.serviceActive {
-      font-weight: bolder;
-      font-size: 32rpx;
-      color: #000;
+    .hero-btn {
+      height: 76rpx;
+      padding: 0 44rpx;
+      border-radius: 38rpx;
+      font-size: 30rpx;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20rpx;
 
-      &::after {
-        background: #3ccdc8;
+      &.primary {
+        background: #fff;
+        color: #16a34a;
+      }
+      &.ghost {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: 2rpx solid rgba(255, 255, 255, 0.5);
       }
     }
   }
 }
 
-.service-type-life {
-  margin: 0 auto;
-  width: 300rpx;
-  color: #999;
-
-  .serviceActive {
-    font-weight: bolder;
-    font-size: 32rpx;
-    color: #333333 !important;
-  }
-}
-
-.padding-left-5 {
-  padding-left: 10rpx;
-}
-
-.home_main{
-  width: 750rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: linear-gradient(180deg, #FEF1DE 0%, #FFF 30%, #FFF 100%);
-  // background: linear-gradient(180deg, #FEF1DE 0%, rgba(255,245,232,0) 30%, rgba(255,245,232,0) 100%);
-  position: relative;
-  box-sizing: border-box;
-  padding-bottom: 110rpx;
-  overflow-y: auto;
-}
-.home_main_item{
-  position: relative;
-  width: 690rpx;
-}
-.home_main_bg{
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 616rpx;
-  height: 478rpx;
-  z-index: 0;
-}
-
-.hf-title-box{
-  width: 704rpx;
+.section-head {
   display: flex;
   align-items: center;
-  // margin-top: 40rpx;
-  margin-bottom: 16rpx;
+  justify-content: space-between;
+  margin: 30rpx 24rpx 16rpx;
 
-  .hf-title-img{
-    width: 6rpx;
-    height: 29rpx;
-    background: #FF6634;
-    border-radius: 3rpx;
-    margin-right: 16rpx;
-  }
-  .hf-title-text{
-    color: #000;
+  .section-title {
     font-size: 32rpx;
     font-weight: bold;
+    color: #111827;
+    margin: 0;
   }
+  .section-more {
+    font-size: 26rpx;
+    color: #16a34a;
+  }
+}
+
+.section-title {
+  margin: 30rpx 24rpx 16rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #111827;
+}
+
+.cat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 18rpx;
+
+  .cat-item {
+    width: calc(33.33% - 12rpx);
+    margin: 0 6rpx 12rpx;
+    padding: 24rpx 0 20rpx;
+    background: #fff;
+    border-radius: 20rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+
+    .cat-icon {
+      width: 76rpx;
+      height: 76rpx;
+      border-radius: 20rpx;
+      color: #fff;
+      font-size: 32rpx;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cat-name {
+      margin-top: 14rpx;
+      font-size: 27rpx;
+      color: #1f2937;
+      font-weight: 500;
+    }
+    .cat-price {
+      margin-top: 6rpx;
+      font-size: 22rpx;
+      color: #f59e0b;
+    }
+  }
+}
+
+.promise-grid {
+  display: flex;
+  margin: 0 24rpx;
+  padding: 24rpx 0;
+  background: #fff;
+  border-radius: 20rpx;
+
+  .promise-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .promise-icon {
+      width: 64rpx;
+      height: 64rpx;
+      border-radius: 50%;
+      background: #ecfdf5;
+      color: #16a34a;
+      font-size: 28rpx;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .promise-name {
+      margin-top: 10rpx;
+      font-size: 24rpx;
+      color: #1f2937;
+    }
+    .promise-desc {
+      margin-top: 4rpx;
+      font-size: 20rpx;
+      color: #9ca3af;
+    }
+  }
+}
+
+.flow {
+  display: flex;
+  align-items: flex-start;
+  margin: 0 24rpx;
+  padding: 28rpx 12rpx;
+  background: #fff;
+  border-radius: 20rpx;
+
+  .flow-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+
+    .flow-dot {
+      width: 52rpx;
+      height: 52rpx;
+      border-radius: 50%;
+      background: #16a34a;
+      color: #fff;
+      font-size: 26rpx;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flow-name {
+      margin-top: 12rpx;
+      font-size: 22rpx;
+      color: #4b5563;
+      text-align: center;
+    }
+  }
+}
+
+.faq {
+  margin: 0 24rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 0 24rpx;
+
+  .faq-item {
+    padding: 26rpx 0;
+    border-bottom: 2rpx solid #f3f4f6;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .faq-q-text {
+        font-size: 27rpx;
+        color: #1f2937;
+        font-weight: 500;
+      }
+      .faq-arrow {
+        font-size: 22rpx;
+        color: #9ca3af;
+        transition: transform 0.2s;
+
+        &.open {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    .faq-a {
+      margin-top: 14rpx;
+      font-size: 25rpx;
+      color: #6b7280;
+      line-height: 40rpx;
+    }
+  }
+}
+
+.bottom-cta {
+  display: flex;
+  margin: 32rpx 24rpx 0;
+
+  .cta-btn {
+    flex: 1;
+    height: 88rpx;
+    border-radius: 44rpx;
+    font-size: 30rpx;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.primary {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: #fff;
+      margin-right: 20rpx;
+    }
+    &.ghost {
+      background: #fff;
+      color: #16a34a;
+      border: 2rpx solid #16a34a;
+    }
+  }
+}
+
+.footer-tip {
+  margin-top: 24rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+/* ---------- 首次进入引导（聚光灯压屏）---------- */
+.guide-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
+}
+
+.spotlight {
+  position: fixed;
+  border-radius: 20rpx;
+  /* 用超大外阴影压暗整屏，中间留透明区域，实现"挖洞"效果 */
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.76);
+  transition: all 0.32s cubic-bezier(0.22, 0.9, 0.3, 1);
+  z-index: 301;
+
+  .spotlight-inner {
+    position: absolute;
+    top: -3rpx;
+    left: -3rpx;
+    right: -3rpx;
+    bottom: -3rpx;
+    border: 3rpx solid rgba(34, 197, 94, 0.85);
+    border-radius: 24rpx;
+    animation: spotlight-pulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes spotlight-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.guide-bubble {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 30rpx 30rpx 24rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.32);
+  z-index: 302;
+  transition: top 0.32s cubic-bezier(0.22, 0.9, 0.3, 1);
+
+  .bubble-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #111827;
+  }
+
+  .bubble-desc {
+    margin-top: 12rpx;
+    font-size: 25rpx;
+    color: #6b7280;
+    line-height: 40rpx;
+  }
+
+  .bubble-footer {
+    margin-top: 24rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .bubble-step {
+      font-size: 24rpx;
+      color: #9ca3af;
+    }
+
+    .bubble-btn {
+      height: 68rpx;
+      padding: 0 44rpx;
+      border-radius: 34rpx;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: #fff;
+      font-size: 27rpx;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+.guide-skip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 70rpx;
+  display: flex;
+  justify-content: center;
+  z-index: 302;
+
+  text {
+    padding: 14rpx 44rpx;
+    border-radius: 30rpx;
+    border: 2rpx solid rgba(255, 255, 255, 0.45);
+    font-size: 25rpx;
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* 手指指向 */
+.guide-finger {
+  position: fixed;
+  z-index: 303;
+  animation: finger-bounce 1.2s ease-in-out infinite;
+
+  .finger-icon {
+    font-size: 68rpx;
+    line-height: 1;
+    text-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes finger-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-16rpx);
+  }
+}
+
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+
+  .contact-card {
+    width: 560rpx;
+    padding: 40rpx 30rpx 30rpx;
+    background: #fff;
+    border-radius: 24rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .contact-title {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #111827;
+    }
+    .contact-qr {
+      width: 320rpx;
+      height: 320rpx;
+      margin: 28rpx 0;
+      border-radius: 16rpx;
+      background: #f3f4f6;
+    }
+    .contact-qr-placeholder {
+      width: 320rpx;
+      height: 320rpx;
+      margin: 28rpx 0;
+      border-radius: 16rpx;
+      background: #f3f4f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      .placeholder-line {
+        font-size: 20rpx;
+        color: #9ca3af;
+        line-height: 34rpx;
+      }
+    }
+    .contact-phone {
+      font-size: 28rpx;
+      color: #2563eb;
+    }
+    .contact-close {
+      margin-top: 24rpx;
+      height: 76rpx;
+      padding: 0 60rpx;
+      border-radius: 38rpx;
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 28rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+</style>
+
+<!-- 非 scoped：小程序各页面 wxss 相互独立，此规则只作用于首页 -->
+<style lang="scss">
+page {
+  height: 100vh;
+  overflow: hidden;
 }
 </style>
