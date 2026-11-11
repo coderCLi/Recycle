@@ -12,13 +12,15 @@
           <view class="success-icon">✓</view>
           <view class="success-title">预约提交成功</view>
           <view class="success-desc">我们会在 2 小时内与您联系，请保持电话畅通</view>
-          <view v-if="noticeSent" class="success-notice">预约通知已发送至微信服务通知</view>
           <!-- #ifdef MP-WEIXIN -->
+          <view v-if="subscribeStatus === 'accept'" class="success-notice">
+            已开启预约通知，商家处理后会在微信通知你
+          </view>
           <view v-else-if="subscribeBlocked" class="success-warn">
-            未开启「预约回收通知」，微信不会再次主动弹窗
+            未开启「预约回收通知」，商家处理后无法通知你
             <text class="success-link" @click="showSubscribeHelp">如何开启</text>
           </view>
-          <view v-if="!noticeSent" class="btn-ghost" @click="retrySubscribe">
+          <view v-if="subscribeStatus !== 'accept'" class="btn-ghost" @click="retrySubscribe">
             {{ retrying ? "申请中..." : "开启预约通知" }}
           </view>
           <!-- #endif -->
@@ -131,7 +133,7 @@
             {{ submitting ? "提交中..." : "提交预约" }}
           </view>
           <view class="tip">提交即表示同意上门回收服务</view>
-          <view class="tip tip-sub">每次提交都会申请一次「预约回收通知」，微信勾选“不再询问”后将不再弹窗</view>
+          <view class="tip tip-sub">提交时申请「预约回收通知」授权，商家处理后会通知你</view>
           <vc-safe-bottom />
         </scroll-view>
       </view>
@@ -157,11 +159,8 @@ export default {
       },
       item: null,
       submitted: false,
-      noticeSent: false,
       // 本次订阅授权结果：accept / reject / ban / filter / invalid / error / unsupported
       subscribeStatus: "",
-      // 最近一次提交的订单（成功页重新授权后补发通知用）
-      lastOrder: null,
       retrying: false,
       timeSlots: ["上午 9:00-12:00", "下午 13:00-17:00", "晚上 18:00-20:00"],
       // 物品照片（最多 4 张）
@@ -356,6 +355,7 @@ export default {
         try {
           const res = await submitAppointment(order);
           if (res && res.success) {
+            if (res.id) order._id = res.id;
             this.finish(order);
             return;
           }
@@ -374,28 +374,27 @@ export default {
     },
     finish(order) {
       if (!order.createTime) order.createTime = Date.now();
-      this.lastOrder = order;
       const list = this.bridgeSdk.getStorageSync("recycle_orders") || [];
       list.unshift(order);
       this.bridgeSdk.setStorageSync("recycle_orders", list);
 
-      // 企业微信通知（不阻塞主流程）
-      notifyWecom(order);
-
-      // 客户侧确认通知：一次性订阅消息「预约回收通知」（失败不阻塞主流程）
-      if (order.subscribeAccepted) {
-        sendAppointmentNotice(order)
-          .then((res) => {
-            console.log("预约通知发送结果", res);
-            if (res && res.success) this.noticeSent = true;
-          })
-          .catch((e) => console.warn("预约通知发送失败", e));
-      }
+      // 提交时只通知商家（企业微信 + 已开启提醒的管理员），客户此时不收消息；
+      // 客户的订阅授权留到商家在管理端点「通知客户」时使用
+      sendAppointmentNotice(order)
+        .then((res) => {
+          console.log("商家预约通知发送结果", res);
+          // 云函数没能推送企业微信时，客户端兜底再试一次
+          if (!res || !res.wecom) notifyWecom(order);
+        })
+        .catch((e) => {
+          console.warn("商家预约通知发送失败，客户端兜底通知企业微信", e);
+          notifyWecom(order);
+        });
 
       this.trackReport.trackCustom("提交预约", JSON.stringify({ item: this.item && this.item.model }));
       this.submitted = true;
     },
-    /** 成功页重新申请订阅授权，授权成功后补发本次预约通知 */
+    /** 成功页补充开启订阅授权（授权留到商家处理后接收通知） */
     async retrySubscribe() {
       if (this.retrying) return;
       this.retrying = true;
@@ -403,19 +402,9 @@ export default {
         const status = await requestAppointmentSubscribe();
         this.subscribeStatus = status;
         console.log("重新申请订阅结果", status);
-        if (status !== "accept") {
-          this.showSubscribeHelp();
-          return;
-        }
-        const res = await sendAppointmentNotice({
-          ...(this.lastOrder || {}),
-          subscribeAccepted: true,
-        });
-        if (res && res.success) {
-          this.noticeSent = true;
-          this.bridgeSdk.showToast({ title: "预约通知已发送" });
+        if (status === "accept") {
+          this.bridgeSdk.showToast({ title: "已开启，商家处理后会通知你" });
         } else {
-          console.warn("补发预约通知失败", res);
           this.showSubscribeHelp();
         }
       } catch (e) {
@@ -430,7 +419,7 @@ export default {
       uni.showModal({
         title: "开启预约通知",
         content:
-          "微信已记住你上次选择的「不通知」。请点击右上角「···」→「设置」→ 打开「订阅消息」中的「预约回收通知」，之后重新提交预约即可收到通知。",
+          "微信已记住你上次选择的「不通知」。请点击右上角「···」→「设置」→ 打开「订阅消息」中的「预约回收通知」，开启后商家处理完你的预约会通过微信通知你。",
         showCancel: false,
         confirmText: "知道了",
       });

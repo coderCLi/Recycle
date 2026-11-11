@@ -11,6 +11,7 @@
  *   'me'            查询当前身份
  *   'bind'          绑定为管理员（需绑定码）
  *   'list'          分页查列表（参数 page / pageSize / status）
+ *   'detail'        查单条详情（管理员 / 本人 / 分享链接可看）
  *   'updateStatus'  改状态（参数 id / status）
  *   'remove'        软删除，移入回收站（仅 done 可删）
  *   'batchRemove'   批量软删除
@@ -50,8 +51,17 @@ exports.main = async (event = {}) => {
   try {
     // ---------- 身份 ----------
     if (action === 'me') {
-      const admin = await isAdminOpenid(db, openid)
-      return { success: true, isAdmin: admin, openid }
+      let admin = false
+      let noticeReady = false
+      try {
+        const res = await db.collection('admins').where({ openid }).limit(1).get()
+        const doc = (res.data || [])[0]
+        admin = !!doc
+        noticeReady = !!(doc && doc.noticeReady)
+      } catch (e) {
+        admin = false
+      }
+      return { success: true, isAdmin: admin, noticeReady, openid }
     }
 
     // ---------- 绑定管理员 ----------
@@ -82,6 +92,48 @@ exports.main = async (event = {}) => {
     const admin = await isAdminOpenid(db, openid)
     if (!admin) {
       return { success: false, message: '无管理权限', openid }
+    }
+
+    // ---------- 管理员开启一条预约提醒（一次性订阅授权已完成）----------
+    if (action === 'subscribeNotice') {
+      if (!admin) return { success: false, message: '无管理权限' }
+      try {
+        const res = await db.collection('admins').where({ openid }).limit(1).get()
+        const doc = (res.data || [])[0]
+        if (!doc) return { success: false, message: '无管理权限' }
+        await db.collection('admins').doc(doc._id).update({
+          data: { noticeReady: true, noticeTime: db.serverDate() },
+        })
+        return { success: true, noticeReady: true }
+      } catch (e) {
+        console.error('subscribeNotice error', e)
+        return { success: false, message: '开启提醒失败' }
+      }
+    }
+
+    // ---------- 单条详情（管理员 / 创建者 / 分享链接）----------
+    // 客户端直接读数据库时受「仅创建者可读写」限制，管理员读不到别人的预约，
+    // 因此详情统一走云函数（分享链接带 shared=true，只读展示）。
+    if (action === 'detail') {
+      if (!id) return { success: false, message: '参数不完整' }
+      try {
+        const doc = await db.collection('appointments').doc(id).get()
+        const data = doc && doc.data
+        if (!data) return { success: false, message: '预约不存在或已删除' }
+        const owner = data._openid || data.openid
+        // shared 允许 true / '1' / 1，兼容不同调用方
+        const isShared =
+          event.shared === true || event.shared === '1' || event.shared === 1
+        if (!admin && owner !== openid && !isShared) {
+          return { success: false, message: '无查看权限' }
+        }
+        // 不把用户标识返回给前端
+        delete data._openid
+        delete data.openid
+        return { success: true, order: data }
+      } catch (e) {
+        return { success: false, message: '预约不存在或已删除' }
+      }
     }
 
     // ---------- 删除单条（软删除 → 回收站，仅 done）----------

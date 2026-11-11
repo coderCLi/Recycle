@@ -378,8 +378,8 @@ export default {
 .mine-scroll {
   flex: 1;
   height: 0;
-  /* 留白高度 = 底栏内容高(96rpx) + 底部安全区，避免露出灰底 */
-  padding-bottom: calc(96rpx + env(safe-area-inset-bottom));
+  /* 留白高度 = 底栏内容高(108rpx) + 底部安全区，避免内容被底栏挡住 */
+  padding-bottom: calc(108rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
@@ -751,6 +751,7 @@ export default {
 <style lang="scss">
 page {
   height: 100vh;
-  overflow: hidden;
+  /* 用 visible 让底栏中间按钮能凸出显示；页面高度已锁死，不会因此可滚动 */
+  overflow: visible;
 }
 </style>

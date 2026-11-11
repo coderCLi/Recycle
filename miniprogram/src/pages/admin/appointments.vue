@@ -47,6 +47,19 @@
             </view>
           </view>
 
+          <!-- 新预约微信提醒（管理员一次性订阅，每开启一次可收 1 条） -->
+          <view class="notice-bar">
+            <view class="notice-info">
+              <view class="notice-title">新预约微信提醒</view>
+              <view class="notice-desc">
+                {{ noticeReady ? "已开启，下一条新预约会通知你" : "每开启一次可接收 1 条新预约通知" }}
+              </view>
+            </view>
+            <view class="notice-btn" :class="{ active: noticeReady }" @click="enableNotice">
+              {{ noticeReady ? "再开启一条" : "开启提醒" }}
+            </view>
+          </view>
+
           <scroll-view
             class="scroll-body"
             scroll-y
@@ -108,6 +121,14 @@
 
                 <view v-if="!managing" class="actions">
                   <view class="btn call" @click.stop="call(order.phone)">拨打电话</view>
+                  <view
+                    v-if="order.status !== 'deleted'"
+                    class="btn notify"
+                    :class="{ notified: order.customerNotified }"
+                    @click.stop="notifyCustomer(order)"
+                  >
+                    {{ order.customerNotified ? "已通知" : "通知客户" }}
+                  </view>
                   <view v-if="order.status !== 'done'" class="btn done" @click.stop="updateStatus(order, 'done')">标记完成</view>
                   <view v-else class="btn revert" @click.stop="updateStatus(order, 'pending')">恢复待处理</view>
                 </view>
@@ -157,7 +178,10 @@ import {
   adminRestoreAppointment,
   adminBatchRestoreAppointments,
   adminUpdateAppointmentStatus,
+  adminSubscribeNotice,
+  sendAppointmentNotice,
 } from "@/utils/cloud";
+import { requestAppointmentSubscribe } from "@/utils/subscribe";
 import vcLoading from "@/components/library/base/vc-loading/vc-loading.vue";
 
 export default {
@@ -177,6 +201,8 @@ export default {
       checking: true,
       needBind: false,
       isAdmin: false,
+      // 管理员是否已开启一条新预约微信提醒（一次性订阅）
+      noticeReady: false,
       bindCode: "",
       loading: false,
       noPermission: false,
@@ -253,6 +279,7 @@ export default {
         if (res && res.success && res.isAdmin) {
           this.isAdmin = true;
           this.needBind = false;
+          this.noticeReady = !!res.noticeReady;
           await this.loadList();
         } else {
           this.isAdmin = false;
@@ -275,6 +302,7 @@ export default {
         if (res && res.success) {
           this.isAdmin = true;
           this.needBind = false;
+          this.noticeReady = false;
           this.bridgeSdk.showToast({ title: "绑定成功" });
           await this.loadList();
         } else {
@@ -284,6 +312,63 @@ export default {
         console.warn("绑定失败", e);
         this.bridgeSdk.showToast({ title: "云函数不可用，请检查部署" });
       }
+    },
+    // ---------- 商家处理完：通知客户 ----------
+    /** 发送客户通知（手动按钮和标记完成自动触发共用） */
+    async sendCustomerNotice(order) {
+      try {
+        // 用客户提交时留下的订阅授权，由云函数发给预约创建者
+        const res = await sendAppointmentNotice({ _id: order._id }, { asAdmin: true });
+        if (res && res.customer) {
+          order.customerNotified = true;
+          return { ok: true, already: !!res.already };
+        }
+        return { ok: false, message: (res && res.message) || "通知失败" };
+      } catch (e) {
+        console.warn("通知客户失败", e);
+        return { ok: false, message: "云函数不可用，请检查部署" };
+      }
+    },
+    async notifyCustomer(order) {
+      if (order.customerNotified) {
+        this.bridgeSdk.showToast({ title: "该预约已通知过客户" });
+        return;
+      }
+      const r = await this.sendCustomerNotice(order);
+      this.bridgeSdk.showToast({
+        title: r.ok ? (r.already ? "客户已通知过" : "已通知客户") : r.message,
+      });
+    },
+    // ---------- 新预约微信提醒（管理员一次性订阅）----------
+    async enableNotice() {
+      // 一次性订阅授权必须在点击事件中发起
+      const status = await requestAppointmentSubscribe();
+      console.log("管理员订阅授权结果", status);
+      if (status !== "accept") {
+        this.showNoticeHelp();
+        return;
+      }
+      try {
+        const res = await adminSubscribeNotice();
+        if (res && res.success) {
+          this.noticeReady = true;
+          this.bridgeSdk.showToast({ title: "已开启，下一条新预约会通知你" });
+        } else {
+          this.bridgeSdk.showToast({ title: (res && res.message) || "开启失败" });
+        }
+      } catch (e) {
+        console.warn("开启预约提醒失败", e);
+        this.bridgeSdk.showToast({ title: "云函数未部署或不可用" });
+      }
+    },
+    showNoticeHelp() {
+      uni.showModal({
+        title: "开启预约提醒",
+        content:
+          "微信已记住你上次选择的「不通知」。请点击右上角「···」→「设置」→ 打开「订阅消息」中的「预约回收通知」，再回来点“开启提醒”。",
+        showCancel: false,
+        confirmText: "知道了",
+      });
     },
     async onRefresh() {
       this.refreshing = true;
@@ -365,7 +450,15 @@ export default {
         const res = await adminUpdateAppointmentStatus(o._id, status);
         if (res && res.success) {
           o.status = status;
-          this.bridgeSdk.showToast({ title: status === "done" ? "已标记完成" : "已恢复待处理" });
+          // 标记完成时自动通知客户；已通知过的、恢复待处理的不发
+          if (status === "done" && !o.customerNotified) {
+            const r = await this.sendCustomerNotice(o);
+            this.bridgeSdk.showToast({
+              title: r.ok ? "已完成，已通知客户" : "已完成，通知客户失败",
+            });
+          } else {
+            this.bridgeSdk.showToast({ title: status === "done" ? "已标记完成" : "已恢复待处理" });
+          }
         } else {
           this.bridgeSdk.showToast({ title: (res && res.message) || "操作失败" });
         }
@@ -745,6 +838,40 @@ export default {
   }
 }
 
+.notice-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16rpx 24rpx 0;
+  padding: 20rpx 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+
+  .notice-title {
+    font-size: 27rpx;
+    font-weight: bold;
+    color: #111827;
+  }
+  .notice-desc {
+    margin-top: 6rpx;
+    font-size: 22rpx;
+    color: #9ca3af;
+  }
+  .notice-btn {
+    flex-shrink: 0;
+    margin-left: 20rpx;
+    padding: 14rpx 26rpx;
+    border-radius: 30rpx;
+    background: #ecfdf5;
+    color: #16a34a;
+    font-size: 25rpx;
+
+    &.active {
+      background: #dcfce7;
+    }
+  }
+}
+
 .toolbar {
   display: flex;
   align-items: center;
@@ -975,6 +1102,15 @@ export default {
       &.call {
         background: #eff6ff;
         color: #2563eb;
+      }
+      &.notify {
+        background: #fffbeb;
+        color: #d97706;
+
+        &.notified {
+          background: #f3f4f6;
+          color: #9ca3af;
+        }
       }
       &.done {
         background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);

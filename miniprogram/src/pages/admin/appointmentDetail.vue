@@ -106,9 +106,9 @@
           </view>
         </template>
 
-        <!-- 分享按钮始终显示（无论是否加载到数据），支持对方二次转发 -->
-        <button v-if="!loading" class="share-btn" open-type="share">分享给他人查看</button>
-        <view v-if="!loading" class="share-tip">对方打开后仅可查看和复制，无法修改</view>
+        <!-- 分享按钮：仅本人打开时显示；分享进来的访客不可再转发 -->
+        <button v-if="!loading && !shared" class="share-btn" open-type="share">分享给他人查看</button>
+        <view v-if="!loading && !shared" class="share-tip">对方打开后仅可查看和复制，无法修改</view>
 
         <vc-safe-bottom />
       </view>
@@ -117,7 +117,7 @@
 </template>
 
 <script>
-import { toTempFileURLs } from "@/utils/cloud";
+import { toTempFileURLs, callFunction } from "@/utils/cloud";
 import vcLoading from "@/components/library/base/vc-loading/vc-loading.vue";
 
 export default {
@@ -133,6 +133,8 @@ export default {
         },
       },
       id: "",
+      // 是否为分享打开（分享链接只读查看）
+      shared: false,
       order: null,
       loading: true,
       expanded: { address: false, remark: false },
@@ -156,12 +158,23 @@ export default {
   },
   onLoad(options) {
     this.id = options.id || "";
+    this.shared = options.shared === "1" || options.shared === "true";
     this.loadDetail();
+  },
+  onShow() {
+    // 分享进入的访客：隐藏右上角转发菜单，避免二次传播
+    if (this.shared) {
+      try {
+        uni.hideShareMenu({ menus: ["shareAppMessage", "shareTimeline"] });
+      } catch (e) {
+        console.warn("隐藏分享菜单失败", e);
+      }
+    }
   },
   onShareAppMessage() {
     return {
       title: "回收预约详情",
-      path: `/pages/admin/appointmentDetail?id=${this.id}`,
+      path: `/pages/admin/appointmentDetail?id=${this.id}&shared=1`,
     };
   },
   methods: {
@@ -171,9 +184,20 @@ export default {
         return;
       }
       try {
-        const db = wx.cloud.database();
-        const res = await db.collection("appointments").doc(this.id).get();
-        this.order = res.data || null;
+        const res = await callFunction("adminGetAppointments", {
+          action: "detail",
+          id: this.id,
+          shared: this.shared,
+        });
+        if (res && res.success && res.order) {
+          this.order = res.order;
+        } else if (res && res.success && Array.isArray(res.list)) {
+          // 兜底：云端若是旧版云函数（无 detail 分支），从返回列表里按 id 查找
+          this.order = res.list.find((x) => x && x._id === this.id) || null;
+        } else {
+          this.order = null;
+          console.warn("加载预约详情失败", res);
+        }
       } catch (e) {
         console.warn("加载预约详情失败", e);
         this.bridgeSdk.showToast({ title: "加载失败" });

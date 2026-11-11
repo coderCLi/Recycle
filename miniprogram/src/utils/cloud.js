@@ -58,16 +58,18 @@ export const submitAppointment = async (order) => {
 }
 
 /**
- * 下发「预约回收通知」一次性订阅消息
- * 需要用户已在点击提交时授权（order.subscribeAccepted === true），失败不影响预约单
+ * 预约通知云函数
+ * - 默认：客户刚提交，通知商家（企业微信 + 已开启提醒的管理员）
+ * - { asAdmin: true }：商家处理后通知客户（使用客户提交时的订阅授权）
+ * 失败不影响预约单
  */
-export const sendAppointmentNotice = async (order) => {
+export const sendAppointmentNotice = async (order, options = {}) => {
   if (!isCloudAvailable()) {
     throw new Error('云开发不可用')
   }
   const res = await wx.cloud.callFunction({
     name: 'sendAppointmentNotice',
-    data: { order },
+    data: { order, id: (order && order._id) || '', ...options },
   })
   return res.result || {}
 }
@@ -144,6 +146,10 @@ export const adminBind = (code) =>
 
 /** 查询当前用户是否管理员（不显示 loading） */
 export const adminMe = () => callFunction('adminGetAppointments', { action: 'me' })
+
+/** 管理员开启一条预约提醒（调用前需先在小程序端完成订阅授权） */
+export const adminSubscribeNotice = () =>
+  callFunction('adminGetAppointments', { action: 'subscribeNotice' })
 
 /** 分页查询预约列表（不显示 loading，页面用品牌 loading） */
 export const adminListPage = (params = {}) =>

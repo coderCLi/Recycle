@@ -77,13 +77,14 @@ export default {
   bottom: 0;
   z-index: 900;
   background: #fff;
-  /* 极细分隔线，和页面内容轻微分开，不产生阴影带 */
   border-top: 1rpx solid rgba(0, 0, 0, 0.06);
   padding-bottom: env(safe-area-inset-bottom);
+  /* 允许中间按钮凸出到栏外显示 */
+  overflow: visible;
 }
 
 .tabbar-items {
-  height: 96rpx;
+  height: 108rpx;
   display: flex;
   align-items: center;
 }
@@ -94,7 +95,6 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 6rpx;
 
   .tab-icon {
     width: 44rpx;
@@ -102,8 +102,8 @@ export default {
   }
 
   .tab-name {
-    margin-top: 6rpx;
-    font-size: 19rpx;
+    margin-top: 8rpx;
+    font-size: 20rpx;
     color: #9ca3af;
   }
 
@@ -117,34 +117,36 @@ export default {
 
 .tab-center {
   flex: 1;
+  /* 父级 align-items:center 会让子项高度变 0，必须撑满，否则按钮定位错位 */
+  align-self: stretch;
   display: flex;
   justify-content: center;
   position: relative;
 
   .center-btn {
     position: absolute;
-    bottom: -4rpx;
-    width: 112rpx;
-    height: 112rpx;
+    bottom: 12rpx;
+    width: 108rpx;
+    height: 108rpx;
     box-sizing: border-box;
     border-radius: 50%;
-    /* 纯色黄，和参考图一致 */
-    background: #fbbf24;
-    /* 白色粗环：在白色底栏上形成"从底栏穿出"的隔离效果 */
-    border: 9rpx solid #fff;
-    /* 外圈极淡描边 + 底部投影，勾出按钮轮廓 */
+    /* 参考图：纯黄实心圆 */
+    background: #fcd34d;
+    /* 参考图：一圈细白环，与白色底栏融合 */
+    border: 4rpx solid #fff;
+    /* 参考图：极淡外圈勾边 + 轻微投影 */
     box-shadow:
-      0 0 0 2rpx rgba(0, 0, 0, 0.05),
-      0 8rpx 18rpx rgba(0, 0, 0, 0.12);
+      0 0 0 2rpx rgba(0, 0, 0, 0.03),
+      0 2rpx 8rpx rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
 
     .center-text {
-      font-size: 30rpx;
-      font-weight: 900;
+      font-size: 28rpx;
+      font-weight: 700;
       color: #111827;
-      letter-spacing: 2rpx;
+      letter-spacing: 0;
     }
   }
 }
